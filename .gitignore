@@ -1,0 +1,3 @@
+*.pyc
+dist
+kervi_component_library.egg-info
