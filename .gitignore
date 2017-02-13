@@ -1,4 +1,3 @@
 *.pyc
 dist
-kervi_devices_library.egg-info
-kervi_components_library.egg-info/
+kervi_device_library.egg-info
