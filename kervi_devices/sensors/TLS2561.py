@@ -1,8 +1,8 @@
 import sys
 import time
-from kervi.hal import I2CSensor
+from kervi.hal import I2CSensorDevice
 
-class TSL2561(I2CSensor):
+class TSL2561(I2CSensorDevice):
     def __init__(self, address=0x39, bus=None):
         I2CSensor.__init__(self, address, bus)
         self.gain = 0 # no gain preselected
