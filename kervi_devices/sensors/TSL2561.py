@@ -1,23 +1,31 @@
-import sys
 import time
 from kervi.hal import I2CSensorDevice
 
-class TSL2561(I2CSensorDevice):
+class TSL2561Device(I2CSensorDevice):
     def __init__(self, address=0x39, bus=None):
-        I2CSensor.__init__(self, address, bus)
-        self.gain = 0 # no gain preselected
-        self.i2c.write8(0x80, 0x03)     # enable the device
+        I2CSensorDevice.__init__(self, address, bus)
+        self.gain = 0
+        self.i2c.write8(0x80, 0x03)
         self.pause = 1
         self.gain = 0
+
+    @property
+    def type(self):
+        return "lux"
+
+    @property
+    def unit(self):
+        return "LUX"
+
 
     def set_gain(self, gain=1):
         """ Set the gain """
         if gain == 1:
-            self.i2c.write8(0x81, 0x02)     # set gain = 1X and timing = 402 mSec
+            self.i2c.write8(0x81, 0x02)
         else:
-            self.i2c.write8(0x81, 0x12)     # set gain = 16X and timing = 402 mSec
+            self.i2c.write8(0x81, 0x12)
 
-        time.sleep(self.pause)              # pause for integration (self.pause must be bigger than integration time)
+        time.sleep(self.pause)
 
 
     def read_word(self, reg):
@@ -44,21 +52,21 @@ class TSL2561(I2CSensorDevice):
             self.set_gain(self.gain)
             ambient = self.read_full()
             IR = self.read_ir()
-        elif self.gain == 0: # auto gain
-            self.set_gain(16) # first try highGain
+        elif self.gain == 0:
+            self.set_gain(16)
             ambient = self.read_full()
             if ambient < 65535:
                 ir_reading = self.read_ir()
-            if ambient >= 65535 or IR >= 65535: # value(s) exeed(s) datarange
-                self.set_gain(1) # set lowGain
+            if ambient >= 65535 or IR >= 65535:
+                self.set_gain(1)
                 ambient = self.read_full()
                 ir_reading = self.read_ir()
 
         if self.gain == 1:
-            ambient *= 16    # scale 1x to 16x
-            ir_reading *= 16         # scale 1x to 16x
+            ambient *= 16
+            ir_reading *= 16
 
-        ratio = (ir_reading / float(ambient)) # changed to make it run under python 2
+        ratio = (ir_reading / float(ambient))
 
         if (ratio >= 0) & (ratio <= 0.52):
             lux = (0.0315 * ambient) - (0.0593 * ambient * (ratio**1.4))
