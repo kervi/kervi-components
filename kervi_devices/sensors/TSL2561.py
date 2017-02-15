@@ -6,7 +6,7 @@ class TSL2561Device(I2CSensorDevice):
         I2CSensorDevice.__init__(self, address, bus)
         self.gain = 0
         self.i2c.write8(0x80, 0x03)
-        self.pause = 1
+        self.pause = 0.8
         self.gain = 0
 
     @property
@@ -31,7 +31,7 @@ class TSL2561Device(I2CSensorDevice):
     def read_word(self, reg):
         try:
             wordval = self.i2c.read_U16(reg)
-            newval = self.i2c.reverseByteOrder(wordval)
+            newval = self.i2c.reverse_byte_order(wordval)
             return newval
         except IOError:
             print("Error accessing 0x%02X: Check your I2C address" % self.i2c.address)
@@ -51,13 +51,13 @@ class TSL2561Device(I2CSensorDevice):
         if self.gain == 1 or self.gain == 16:
             self.set_gain(self.gain)
             ambient = self.read_full()
-            IR = self.read_ir()
+            ir_reading = self.read_ir()
         elif self.gain == 0:
             self.set_gain(16)
             ambient = self.read_full()
             if ambient < 65535:
                 ir_reading = self.read_ir()
-            if ambient >= 65535 or IR >= 65535:
+            if ambient >= 65535 or ir_reading >= 65535:
                 self.set_gain(1)
                 ambient = self.read_full()
                 ir_reading = self.read_ir()
