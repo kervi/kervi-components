@@ -57,14 +57,14 @@ BMP085_READTEMPCMD       = 0x2E
 BMP085_READPRESSURECMD   = 0x34
 
 
-class BMP085(I2CSensorDevice):
-    def __init__(self, mode=BMP085_STANDARD, address=BMP085_I2CADDR, bus=0):
+class BMP085Device(I2CSensorDevice):
+    def __init__(self, sensor_type="temp", mode=BMP085_STANDARD, address=BMP085_I2CADDR, bus=0):
         I2CSensorDevice.__init__(self, address, bus)
         # Check that mode is valid.
         if mode not in [BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, BMP085_ULTRAHIGHRES]:
             raise ValueError('Unexpected mode value {0}.  Set mode to one of BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, or BMP085_ULTRAHIGHRES'.format(mode))
         self._mode = mode
-
+        self._sensor_type = sensor_type
         self._load_calibration()
 
     def _load_calibration(self):
@@ -187,5 +187,26 @@ class BMP085(I2CSensorDevice):
         meters. Returns a value in Pascals."""
         pressure = float(self.read_pressure())
         p0 = pressure / pow(1.0 - altitude_m/44330.0, 5.255)
-        self.logger.debug('Sealevel pressure {0} Pa',p0)
+        self.logger.debug('Sealevel pressure {0} Pa', p0)
         return p0
+
+    def read_value(self):
+        if self._sensor_type == "temperature":
+            return self.read_temperature()
+        elif self._sensor_type == "pressure":
+            return self.read_pressure()
+        elif self._sensor_type == "altitude":
+            return self.read_altitude()
+
+    @property
+    def type(self):
+        return self._sensor_type
+
+    @property
+    def unit(self):
+        if self._sensor_type == "temperature":
+            return "C"
+        elif self._sensor_type == "pressure":
+            return "Pa"
+        elif self._sensor_type == "altitude":
+            return "m"
