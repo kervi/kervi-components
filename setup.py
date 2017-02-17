@@ -16,6 +16,13 @@ setup(
     description="""Component library for kervi""",
     packages=[
         "kervi_devices",
-        "kervi_devices.sensors"
+        "kervi_devices/sensors",
+        "kervi_devices/gpio",
+        "kervi_devices/platforms",
+        "kervi_devices/platforms/common",
+        "kervi_devices/platforms/common/sensors"
+    ],
+    install_requires=[
+        'psutil'
     ]
 )

@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-#This file is a modified version of Tony DiCola's work adapted to the Kervi i2c api. 
+#This file is a modified version of Tony DiCola's work adapted to the Kervi i2c and sensors api. 
 
 
 from __future__ import division
@@ -56,9 +56,12 @@ BMP085_PRESSUREDATA      = 0xF6
 BMP085_READTEMPCMD       = 0x2E
 BMP085_READPRESSURECMD   = 0x34
 
+BMP085_TEMPERATURE_SENSOR = 1
+BMP085_PRESSURE_SENSOR = 2
+BMP085_ALTITUDE_SENSOR = 3
 
-class BMP085Device(I2CSensorDevice):
-    def __init__(self, sensor_type="temp", mode=BMP085_STANDARD, address=BMP085_I2CADDR, bus=0):
+class BMP085SensorDevice(I2CSensorDevice):
+    def __init__(self, sensor_type=BMP085_TEMPERATURE_SENSOR, mode=BMP085_STANDARD, address=BMP085_I2CADDR, bus=0):
         I2CSensorDevice.__init__(self, address, bus)
         # Check that mode is valid.
         if mode not in [BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, BMP085_ULTRAHIGHRES]:
@@ -191,22 +194,27 @@ class BMP085Device(I2CSensorDevice):
         return p0
 
     def read_value(self):
-        if self._sensor_type == "temperature":
+        if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
             return self.read_temperature()
-        elif self._sensor_type == "pressure":
+        elif self._sensor_type == BMP085_PRESSURE_SENSOR:
             return self.read_pressure()
-        elif self._sensor_type == "altitude":
+        elif self._sensor_type == BMP085_ALTITUDE_SENSOR:
             return self.read_altitude()
 
     @property
     def type(self):
-        return self._sensor_type
+        if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
+            return "temperature"
+        elif self._sensor_type == BMP085_PRESSURE_SENSOR:
+            return "pressure"
+        elif self._sensor_type == BMP085_ALTITUDE_SENSOR:
+            return "altitude"
 
     @property
     def unit(self):
-        if self._sensor_type == "temperature":
+        if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
             return "C"
-        elif self._sensor_type == "pressure":
+        elif self._sensor_type == BMP085_PRESSURE_SENSOR:
             return "Pa"
-        elif self._sensor_type == "altitude":
+        elif self._sensor_type == BMP085_ALTITUDE_SENSOR:
             return "m"
