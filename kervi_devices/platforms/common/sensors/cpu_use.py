@@ -11,7 +11,6 @@ class CPULoadDevice(SensorDevice):
     def __init__(self):
         psutil.cpu_percent()
 
-    
     def read_value(self):
         return psutil.cpu_percent()
 
