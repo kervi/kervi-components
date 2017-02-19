@@ -1,9 +1,9 @@
 import time
-from kervi.hal import I2CSensorDevice
+from kervi.hal import I2CSensorDeviceDriver
 
-class TSL2561SensorDevice(I2CSensorDevice):
+class TSL2561SDeviceDriver(I2CSensorDeviceDriver):
     def __init__(self, address=0x39, bus=None):
-        I2CSensorDevice.__init__(self, address, bus)
+        I2CSensorDeviceDriver.__init__(self, address, bus)
         self.gain = 0
         self.i2c.write8(0x80, 0x03)
         self.pause = 0.8

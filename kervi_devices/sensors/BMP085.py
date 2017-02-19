@@ -25,7 +25,12 @@
 from __future__ import division
 import logging
 import time
-from kervi.hal import I2CSensorDevice
+from kervi.hal import I2CSensorDeviceDriver
+
+#BMP085 sensor type
+BMP085_TEMPERATURE_SENSOR = 1
+BMP085_PRESSURE_SENSOR = 2
+BMP085_ALTITUDE_SENSOR = 3
 
 # BMP085 default address.
 BMP085_I2CADDR           = 0x77
@@ -36,6 +41,7 @@ BMP085_STANDARD          = 1
 BMP085_HIGHRES           = 2
 BMP085_ULTRAHIGHRES      = 3
 
+#private constants
 # BMP085 Registers
 BMP085_CAL_AC1           = 0xAA  # R   Calibration data (16 bits)
 BMP085_CAL_AC2           = 0xAC  # R   Calibration data (16 bits)
@@ -56,13 +62,9 @@ BMP085_PRESSUREDATA      = 0xF6
 BMP085_READTEMPCMD       = 0x2E
 BMP085_READPRESSURECMD   = 0x34
 
-BMP085_TEMPERATURE_SENSOR = 1
-BMP085_PRESSURE_SENSOR = 2
-BMP085_ALTITUDE_SENSOR = 3
-
-class BMP085SensorDevice(I2CSensorDevice):
+class BMP085DeviceDriver(I2CSensorDeviceDriver):
     def __init__(self, sensor_type=BMP085_TEMPERATURE_SENSOR, mode=BMP085_STANDARD, address=BMP085_I2CADDR, bus=0):
-        I2CSensorDevice.__init__(self, address, bus)
+        I2CSensorDeviceDriver.__init__(self, address, bus)
         # Check that mode is valid.
         if mode not in [BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, BMP085_ULTRAHIGHRES]:
             raise ValueError('Unexpected mode value {0}.  Set mode to one of BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, or BMP085_ULTRAHIGHRES'.format(mode))

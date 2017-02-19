@@ -1,22 +1,14 @@
-from kervi.hal import I2CGPIODevice
+from kervi.hal import I2CGPIODevice, DeviceChannelOutOfBoundsError, DACValueOutOfBoundsError
 
-class I2CaddressOutOfBoundsError(Exception):
-    message = 'I2C Exception: I2C Address Out of Bounds'
-
-# Exception class for a channel number out of bounds
-class PCF8591PchannelOutOfBoundsError(Exception):
-    message = 'PCF8591P Exception: ADC Channel Out of Bounds'
-
-# Exception class for a DAC value out of bounds
-class PCF8591PDACvalueOutOfBoundsError(Exception):
-    message = 'PCF8591P Exception: DAC Output Value Out of Bounds'
-
-class PCF8591P(I2CGPIODevice):
+class PCF8591Driver(I2CGPIODevice):
 
     # Constructor
     def __init__(self, address, bus):
         I2CGPIODevice.__init__(self, address, bus)
         self._dac_enabled = 0x00
+
+    def device_name(self):
+        return "PFC8591"
 
     def get(self, channel):
         """Read single ADC Channel"""
@@ -24,13 +16,13 @@ class PCF8591P(I2CGPIODevice):
         self.i2c.write_raw8(checked_channel  | self._dac_enabled)
         reading = self.i2c.read_raw8() # seems to need to throw away first reading
         reading = self.i2c.read_raw8() # read A/D
-        return reading
+        return reading / 255.0
 
     def set(self, channel, state):
         """Set DAC value and enable output"""
-        checked_val = self._check_dac_val(state)
+        checked_val = self._check_dac_val(channel, state)
         self._dac_enabled = 0x40
-        self.i2c.write8(self._dac_enabled, checked_val)
+        self.i2c.write8(self._dac_enabled, checked_val * 255)
 
     # Enable DAC output
     def enable_dac(self):
@@ -45,19 +37,19 @@ class PCF8591P(I2CGPIODevice):
     # Check if ADC channel number is within bounds
     def _check_channel_no(self, chan):
         if type(chan) is not int:
-            raise PCF8591PchannelOutOfBoundsError
+            raise DeviceChannelOutOfBoundsError(self.device_name, chan)
         elif chan < 0:
-            raise PCF8591PchannelOutOfBoundsError
+            raise DeviceChannelOutOfBoundsError(self.device_name, chan)
         elif chan > 3:
-            raise PCF8591PchannelOutOfBoundsError
+            raise DeviceChannelOutOfBoundsError(self.device_name, chan)
         return chan
 
     # Check if DAC output value is within bounds
-    def _check_dac_val(self, val):
-        if type(val) is not int:
-            raise PCF8591PDACvalueOutOfBoundsError
+    def _check_dac_val(self, channel, val):
+        if type(val) is not float:
+            raise DACValueOutOfBoundsError(self.device_name, channel, val)
         elif val < 0:
-            raise PCF8591PDACvalueOutOfBoundsError
-        elif val > 255:
-            raise PCF8591PDACvalueOutOfBoundsError
+            raise DACValueOutOfBoundsError(self.device_name, channel, val)
+        elif val > 1:
+            raise DACValueOutOfBoundsError(self.device_name, channel, val)
         return val

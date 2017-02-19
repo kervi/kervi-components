@@ -3,11 +3,11 @@
 
 """ Module that defines core cpu sensors """
 
-from kervi.sensor import Sensor, SensorThread
+from kervi.hal import SensorDeviceDriver
 import psutil
 
 
-class DiskUseSensor(Sensor):
+class DiskUseSensorDeviceDriver(SensorDeviceDriver):
     """ Sensor that mesures disk use """
     def __init__(self):
         psutil.disk_usage('/').percent

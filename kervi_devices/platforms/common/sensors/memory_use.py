@@ -1,10 +1,10 @@
 # Copyright (c) 2016, Tim Wentzlau
 # Licensed under MIT
 
-from kervi.sensor import Sensor, SensorThread
+from kervi.hal import SensorDeviceDriver
 import psutil
 
-class MemUseSensor(Sensor):
+class MemUseSensorDeviceDriver(SensorDeviceDriver):
     """ Sensor that mesures memory use """
     def __init__(self):
         try:

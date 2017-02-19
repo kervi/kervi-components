@@ -3,10 +3,10 @@
 
 """ Module that defines core cpu sensors """
 
-from kervi.hal import SensorDevice
+from kervi.hal import SensorDeviceDriver
 import psutil
 
-class CPULoadDevice(SensorDevice):
+class CPULoadSensorDeviceDriver(SensorDeviceDriver):
     """ Sensor that mesures cpu load on host """
     def __init__(self):
         psutil.cpu_percent()
