@@ -1,7 +1,10 @@
+# Copyright (c) 2016, Tim Wentzlau
+# Licensed under MIT
+
 import time
 from kervi.hal import I2CSensorDeviceDriver
 
-class TSL2561SDeviceDriver(I2CSensorDeviceDriver):
+class TSL2561DeviceDriver(I2CSensorDeviceDriver):
     def __init__(self, address=0x39, bus=None):
         I2CSensorDeviceDriver.__init__(self, address, bus)
         self.gain = 0
