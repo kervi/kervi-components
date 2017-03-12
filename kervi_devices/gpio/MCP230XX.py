@@ -45,13 +45,15 @@ class _MCP230XX(I2CGPIODeviceDriver):
         self._write_iodir()
         self._write_gppu()
 
+    @property
     def device_name(self):
         return self._device_name
 
+    @property
     def num_gpio(self):
         return self._num_gpio
 
-    def define_as_input(self, pin):
+    def define_as_input(self, pin, pullup=False):
         """Set the input or output mode for a specified pin.  Mode should be
         either GPIO.OUT or GPIO.IN.
         """
@@ -59,6 +61,7 @@ class _MCP230XX(I2CGPIODeviceDriver):
         # Set bit to 1 for input or 0 for output.
         self.iodir[int(pin/8)] |= 1 << (int(pin%8))
         self._write_iodir()
+        self.pullup(pin, pullup)
 
     def define_as_output(self, pin):
         """Set the input or output mode for a specified pin.  Mode should be

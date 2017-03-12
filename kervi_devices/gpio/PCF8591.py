@@ -6,20 +6,21 @@ from kervi.hal import I2CGPIODeviceDriver, DeviceChannelOutOfBoundsError, DACVal
 from kervi.hal import ChannelPollingThread
 from kervi.utility.thread import KerviThread
 from kervi import spine
-AIN0 = 1
-AIN1 = 2
-AIN2 = 3
-AIN3 = 4
+AIN0 = 0
+AIN1 = 1
+AIN2 = 2
+AIN3 = 3
 AOUT = 0
 
 class PCF8591Driver(I2CGPIODeviceDriver):
 
     # Constructor
-    def __init__(self, address, bus):
+    def __init__(self, address = 0x48, bus=0):
         I2CGPIODeviceDriver.__init__(self, address, bus)
         self._dac_enabled = 0x00
         self._listeners = []
 
+    @property
     def device_name(self):
         return "PFC8591"
 
@@ -27,8 +28,8 @@ class PCF8591Driver(I2CGPIODeviceDriver):
         """Read single ADC Channel"""
         checked_channel = self._check_channel_no(channel)
         self.i2c.write_raw8(checked_channel  | self._dac_enabled)
-        reading = self.i2c.read_raw8() # seems to need to throw away first reading
-        reading = self.i2c.read_raw8() # read A/D
+        reading = self.i2c.read_raw8() 
+        reading = self.i2c.read_raw8() 
         return reading / 255.0
 
     def set(self, channel, state):
@@ -36,6 +37,13 @@ class PCF8591Driver(I2CGPIODeviceDriver):
         checked_val = self._check_dac_val(channel, state)
         self._dac_enabled = 0x40
         self.i2c.write8(self._dac_enabled, checked_val * 255)
+
+    def define_as_input(self, channel, pullup=False):
+        self._check_channel_no(channel)
+
+    def define_as_output(self, channel):
+        if not channel == 0:
+            raise DeviceChannelOutOfBoundsError(self.device_name, channel)
 
     def listen(self, channel, callback, polling_time=.1):
         self._listeners += [ChannelPollingThread(channel, self, callback, polling_time)]

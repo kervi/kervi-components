@@ -17,6 +17,7 @@ setup(
     packages=[
         "kervi_devices",
         "kervi_devices/sensors",
+        "kervi_devices/displays",
         "kervi_devices/gpio",
         "kervi_devices/platforms",
         "kervi_devices/platforms/common",
