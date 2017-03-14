@@ -18,11 +18,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-import time
 
-import kervi.hal as hal
-from kervi.utility.hal.gpio import IGPIODeviceDriver
-from kervi_devices.gpio.PCF8574 import PCF8574DeviceDriver
+#Modified to fit the Kervi device api 
+
+import time
+from kervi.hal.gpio import IGPIODeviceDriver
+from kervi import hal
 
 # Commands
 LCD_CLEARDISPLAY        = 0x01
@@ -78,63 +79,6 @@ LCD_PLATE_GREEN         = 7
 LCD_PLATE_BLUE          = 8
 
 
-# Char LCD pin to I/O extender GPIO pin number maps
-# PCF8574 pins 4-7,9-12 are bits 0-3,4-7, respectively
-# LCD pin name: PCF port bit
-PCFPINMAPS = [
-{
-# map0 - DFRobot, YwRobot, Sainsmart?, also generic black PCB
-# http://www.dfrobot.com/image/data/DFR0175/I2C%20LCD%20Backpack%20schematic.pdf
-'PCF_RS': 0,
-'PCF_RW': 1,
-'PCF_EN': 2,
-'PCF_BL': 3,
-'PCF_D4': 4,
-'PCF_D5': 5,
-'PCF_D6': 6,
-'PCF_D7': 7,
-}, {
-# map1 - map0 with nibbles swapped
-'PCF_RS': 4,
-'PCF_RW': 5,
-'PCF_EN': 6,
-'PCF_BL': 7,
-'PCF_D4': 0,
-'PCF_D5': 1,
-'PCF_D6': 2,
-'PCF_D7': 3,
-}, {
-# map2 - mjkdz board w/22 turn trimmer, GY-LCD-V1
-'PCF_RS': 6,
-'PCF_RW': 5,
-'PCF_EN': 4,
-'PCF_BL': 7,
-'PCF_D4': 0,
-'PCF_D5': 1,
-'PCF_D6': 2,
-'PCF_D7': 3,
-}, {
-# map3 - map2 with nibbles swapped
-'PCF_RS': 0,
-'PCF_RW': 1,
-'PCF_EN': 2,
-'PCF_BL': 3,
-'PCF_D4': 6,
-'PCF_D5': 5,
-'PCF_D6': 4,
-'PCF_D7': 7,
-}, {
-# map4 - ???
-'PCF_RS': 4,
-'PCF_RW': 5,
-'PCF_EN': 6,
-'PCF_BL': 7,
-'PCF_D4': 2,
-'PCF_D5': 1,
-'PCF_D6': 0,
-'PCF_D7': 3,
-},
-]
 
 # Char LCD plate button names.
 SELECT                  = 0
@@ -143,7 +87,7 @@ DOWN                    = 2
 UP                      = 3
 LEFT                    = 4
 
-class AdafruitCharLCD(object):
+class HD44780DeviceDriver(object):
     """Class to represent and interact with an HD44780 character LCD display."""
 
     def __init__(self, rs, en, d4, d5, d6, d7, cols, lines, backlight=None,
@@ -368,8 +312,7 @@ class AdafruitCharLCD(object):
             intensity = 100.0-intensity
         return intensity
 
-
-class AdafruitRGBCharLCD(AdafruitCharLCD):
+class HD44780RGBDeviceDriver(HD44780DeviceDriver):
     """Class to represent and interact with an HD44780 character LCD display with
     an RGB backlight."""
 
@@ -397,7 +340,7 @@ class AdafruitRGBCharLCD(AdafruitCharLCD):
         pass in an GPIO instance, the default GPIO for the running platform will
         be used.
         """
-        super(AdafruitRGBCharLCD, self).__init__(rs, en, d4, d5, d6, d7,
+        super(HD44780RGBDeviceDriver, self).__init__(rs, en, d4, d5, d6, d7,
                                                   cols,
                                                   lines, 
                                                   enable_pwm=enable_pwm,
@@ -465,66 +408,3 @@ class AdafruitRGBCharLCD(AdafruitCharLCD):
         """
         self.set_color(backlight, backlight, backlight)
 
-
-
-class I2CAdafruitCharLCDPlate(AdafruitRGBCharLCD):
-    """Class to represent and interact with an Adafruit Raspberry Pi character
-    LCD plate."""
-
-    def __init__(self, address=0x20, busnum=hal.default_i2c_bus(), cols=16, lines=2):
-        """Initialize the character LCD plate.  Can optionally specify a separate
-        I2C address or bus number, but the defaults should suffice for most needs.
-        Can also optionally specify the number of columns and lines on the LCD
-        (default is 16x2).
-        """
-        # Configure MCP23017 device.
-        self._mcp = PCF8574DeviceDriver(address=address, bus=busnum)
-        # Set LCD R/W pin to low for writing only.
-        self._mcp.define_as_output(LCD_PLATE_RW)
-        self._mcp.set(LCD_PLATE_RW, False)
-        # Set buttons as inputs with pull-ups enabled.
-        for button in (SELECT, RIGHT, DOWN, UP, LEFT):
-            self._mcp.define_as_input(button, True)
-        # Initialize LCD (with no PWM support).
-        super(I2CAdafruitCharLCDPlate, self).__init__(LCD_PLATE_RS, LCD_PLATE_EN,
-            LCD_PLATE_D4, LCD_PLATE_D5, LCD_PLATE_D6, LCD_PLATE_D7, cols, lines,
-            LCD_PLATE_RED, LCD_PLATE_GREEN, LCD_PLATE_BLUE, enable_pwm=False, 
-            gpio=self._mcp)
-
-    def is_pressed(self, button):
-        """Return True if the provided button is pressed, False otherwise."""
-        if button not in set((SELECT, RIGHT, DOWN, UP, LEFT)):
-            raise ValueError('Unknown button, must be SELECT, RIGHT, DOWN, UP, or LEFT.')
-        return self._mcp.get(button)
-
-
-class PCFCharLCD(AdafruitCharLCD):
-    """Class to represent and interact with an Adafruit Raspberry Pi character
-    LCD plate."""
-
-    def __init__(self, address=0x3f, cols=16, lines=2, pin_map=2, busnum=hal.default_i2c_bus()):
-        """Initialize the character LCD plate.  Can optionally specify a separate
-        I2C address or bus number, but the defaults should suffice for most needs.
-        Can also optionally specify the number of columns and lines on the LCD
-        (default is 16x2).
-        """
-        self._storepinmap(pin_map)
-        self._gpio = PCF8574DeviceDriver(address=address, bus=busnum)
-        # Set LCD R/W pin to low for writing only.
-        self._gpio.define_as_output(PCF_RW)
-        self._gpio.set(PCF_RW, False)
-               
-        super(PCFCharLCD, self).__init__(PCF_RS, PCF_EN,
-            PCF_D4, PCF_D5, PCF_D6, PCF_D7, cols, lines,
-            backlight=PCF_BL,
-            invert_polarity=False,
-            enable_pwm=False,
-            gpio=self._gpio)
-
-    def _storepinmap(self, pinmap):
-        try:
-            m = PCFPINMAPS[int(pinmap)]
-        except TypeError:
-            m = pinmap
-        validkeys = PCFPINMAPS[0].keys()
-        globals().update(dict((k,v) for k,v in m.items() if k in validkeys))
