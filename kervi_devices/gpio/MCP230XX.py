@@ -147,9 +147,9 @@ class _MCP230XX(I2CGPIODeviceDriver):
 class MCP23017DeviceDriver(_MCP230XX):
     """MCP23017-based GPIO class with 16 GPIO pins."""
     # Define number of pins and registor addresses.
-    IODIR    = 0x00
-    GPIO     = 0x12
-    GPPU     = 0x0C
+    IODIR = 0x00
+    GPIO = 0x12
+    GPPU = 0x0C
 
     def __init__(self, address=0x20, bus=0):
         _MCP230XX.__init__(self, "MCP23017", 16, address, bus)
@@ -157,9 +157,9 @@ class MCP23017DeviceDriver(_MCP230XX):
 class MCP23008DeviceDriver(_MCP230XX):
     """MCP23008-based GPIO class with 8 GPIO pins."""
     # Define number of pins and registor addresses.
-    IODIR    = 0x00
-    GPIO     = 0x09
-    GPPU     = 0x06
+    IODIR = 0x00
+    GPIO = 0x09
+    GPPU = 0x06
 
     def __init__(self, address=0x20, bus=0):
         _MCP230XX.__init__(self, "MCP23008", 8, address, bus)

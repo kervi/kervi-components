@@ -93,7 +93,6 @@ class HD44780DeviceDriver(object):
     def __init__(self, rs, en, d4, d5, d6, d7, cols, lines, backlight=None,
                     invert_polarity=True,
                     enable_pwm=False,
-                    gpio=hal.GPIO,
                     initial_backlight=1.0):
         """Initialize the LCD.  RS, EN, and D4...D7 parameters should be the pins
         connected to the LCD RS, clock enable, and data line 4 through 7 connections.
@@ -122,7 +121,6 @@ class HD44780DeviceDriver(object):
         self._cols = cols
         self._lines = lines
         # Save GPIO state and pin numbers.
-        self._gpio = gpio
         self._rs = rs
         self._en = en
         self._d4 = d4
@@ -136,14 +134,14 @@ class HD44780DeviceDriver(object):
         self._blpol = not invert_polarity
         # Setup all pins as outputs.
         for pin in (rs, en, d4, d5, d6, d7):
-            self._gpio.define_as_output(pin)
+            pin.define_as_output()
         # Setup backlight.
         if backlight is not None:
             if enable_pwm:
-                self._gpio.pwm_start(backlight, self._pwm_duty_cycle(initial_backlight))
+                self._backlight.pwm_start(self._pwm_duty_cycle(initial_backlight))
             else:
-                self._gpio.define_as_output(backlight)
-                gpio.set(backlight, self._blpol if initial_backlight else not self._blpol)
+                self._backlight.define_as_output()
+                self._backlight.set(self._blpol if initial_backlight else not self._blpol)
         # Initialize the display.
         self.write8(0x33)
         self.write8(0x32)
@@ -250,9 +248,9 @@ class HD44780DeviceDriver(object):
         """
         if self._backlight is not None:
             if self._pwm_enabled:
-                self._gpio.pwm_start(self._backlight, self._pwm_duty_cycle(backlight))
+                self._backlight.pwm_start(self._pwm_duty_cycle(backlight))
             else:
-                self._gpio.set(self._backlight, self._blpol if backlight else not self._blpol)
+                self._backlight.set(self._blpol if backlight else not self._blpol)
 
     def write8(self, value, char_mode=False):
         """Write 8-bit value in character or data mode.  Value should be an int
@@ -262,18 +260,18 @@ class HD44780DeviceDriver(object):
         # One millisecond delay to prevent writing too quickly.
         self._delay_microseconds(1000)
         # Set character / data bit.
-        self._gpio.set(self._rs, char_mode)
+        self._rs.set(char_mode)
         # Write upper 4 bits.
-        self._gpio.set(self._d4, ((value >> 4) & 1) > 0)
-        self._gpio.set(self._d5, ((value >> 5) & 1) > 0)
-        self._gpio.set(self._d6, ((value >> 6) & 1) > 0)
-        self._gpio.set(self._d7, ((value >> 7) & 1) > 0)
+        self._d4.set(((value >> 4) & 1) > 0)
+        self._d5.set(((value >> 5) & 1) > 0)
+        self._d6.set(((value >> 6) & 1) > 0)
+        self._d7.set(((value >> 7) & 1) > 0)
         self._pulse_enable()
         # Write lower 4 bits.
-        self._gpio.set(self._d4, (value        & 1) > 0)
-        self._gpio.set(self._d5, ((value >> 1) & 1) > 0)
-        self._gpio.set(self._d6, ((value >> 2) & 1) > 0)
-        self._gpio.set(self._d7, ((value >> 3) & 1) > 0)
+        self._d4.set((value        & 1) > 0)
+        self._d5.set(((value >> 1) & 1) > 0)
+        self._d6.set(((value >> 2) & 1) > 0)
+        self._d7.set(((value >> 3) & 1) > 0)
         self._pulse_enable()
 
     def create_char(self, location, pattern):
@@ -297,11 +295,11 @@ class HD44780DeviceDriver(object):
 
     def _pulse_enable(self):
         # Pulse the clock enable line off, on, off to send command.
-        self._gpio.set(self._en, False)
+        self._en.set(False)
         self._delay_microseconds(1)       # 1 microsecond pause - enable pulse must be > 450ns
-        self._gpio.set(self._en, True)
+        self._en.set(True)
         self._delay_microseconds(1)       # 1 microsecond pause - enable pulse must be > 450ns
-        self._gpio.set(self._en, False)
+        self._en.set(False)
         self._delay_microseconds(1)       # commands need > 37us to settle
 
     def _pwm_duty_cycle(self, intensity):
@@ -317,7 +315,6 @@ class HD44780RGBDeviceDriver(HD44780DeviceDriver):
     an RGB backlight."""
 
     def __init__(self, rs, en, d4, d5, d6, d7, cols, lines, red, green, blue,
-                 gpio=hal.GPIO, 
                  invert_polarity=True,
                  enable_pwm=False,
                  initial_color=(1.0, 1.0, 1.0)):
@@ -346,7 +343,6 @@ class HD44780RGBDeviceDriver(HD44780DeviceDriver):
                                                   enable_pwm=enable_pwm,
                                                   backlight=None,
                                                   invert_polarity=invert_polarity,
-                                                  gpio=gpio, 
                                                   )
         self._red = red
         self._green = green
@@ -355,14 +351,14 @@ class HD44780RGBDeviceDriver(HD44780DeviceDriver):
         if enable_pwm:
             # Determine initial backlight duty cycles.
             rdc, gdc, bdc = self._rgb_to_duty_cycle(initial_color)
-            self._gpio.pwm_start(red, rdc)
-            self._gpio.pwm_start(green, gdc)
-            self._gpio.pwm_start(blue, bdc)
+            self._red.pwm_start(rdc)
+            self._green.pwm_start(gdc)
+            self._blue.pwm_start(bdc)
         else:
-            self._gpio.define_as_output(red)
-            self._gpio.define_as_output(green)
-            self._gpio.define_as_output(blue)
-            self._gpio.set_channels(self._rgb_to_pins(initial_color))
+            self._red.define_as_output(red)
+            self._green.define_as_output(green)
+            self._blue.define_as_output(blue)
+            self._rgb_to_pins(initial_color)
 
     def _rgb_to_duty_cycle(self, rgb):
         # Convert tuple of RGB 0-1 values to tuple of duty cycles (0-100).
@@ -378,9 +374,9 @@ class HD44780RGBDeviceDriver(HD44780DeviceDriver):
     def _rgb_to_pins(self, rgb):
         # Convert tuple of RGB 0-1 values to dict of pin values.
         red, green, blue = rgb
-        return { self._red:   self._blpol if red else not self._blpol,
-                 self._green: self._blpol if green else not self._blpol,
-                 self._blue:  self._blpol if blue else not self._blpol }
+        self._red.set(self._blpol if red else not self._blpol)
+        self._green.set(self._blpol if green else not self._blpol)
+        self._blue.set(self._blpol if blue else not self._blpol)
 
     def set_color(self, red, green, blue):
         """Set backlight color to provided red, green, and blue values.  If PWM
@@ -390,14 +386,14 @@ class HD44780RGBDeviceDriver(HD44780DeviceDriver):
         if self._pwm_enabled:
             # Set duty cycle of PWM pins.
             rdc, gdc, bdc = self._rgb_to_duty_cycle((red, green, blue))
-            self._gpio.pwm_start(self._red, rdc)
-            self._gpio.pwm.start(self._green, gdc)
-            self._gpio.pwm.start(self._blue, bdc)
+            self._red.pwm_start(rdc)
+            self._green.pwm.start(gdc)
+            self._blue.pwm.start(bdc)
         else:
             # Set appropriate backlight pins based on polarity and enabled colors.
-            self._gpio.set_channels({self._red:   self._blpol if red else not self._blpol,
-                                    self._green: self._blpol if green else not self._blpol,
-                                    self._blue:  self._blpol if blue else not self._blpol })
+            self._red.set(self._blpol if red else not self._blpol)
+            self._green.set(self._blpol if green else not self._blpol)
+            self._blue.set(self._blpol if blue else not self._blpol)
 
     def set_backlight(self, backlight):
         """Enable or disable the backlight.  If PWM is not enabled (default), a

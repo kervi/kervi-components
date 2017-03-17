@@ -76,15 +76,22 @@ class CharLCDDeviceDriver(HD44780DeviceDriver):
         self._storepinmap(pin_map)
         self._gpio = PCF8574DeviceDriver(address=address, bus=busnum)
         # Set LCD R/W pin to low for writing only.
-        self._gpio.define_as_output(PCF_RW)
-        self._gpio.set(PCF_RW, False)
+        self._gpio[PCF_RW].define_as_output()
+        self._gpio[PCF_RW].set(False)
                
-        super(CharLCDDeviceDriver, self).__init__(PCF_RS, PCF_EN,
-            PCF_D4, PCF_D5, PCF_D6, PCF_D7, cols, lines,
-            backlight=PCF_BL,
+        super(CharLCDDeviceDriver, self).__init__(
+            self._gpio[PCF_RS],
+            self._gpio[PCF_EN],
+            self._gpio[PCF_D4],
+            self._gpio[PCF_D5],
+            self._gpio[PCF_D6],
+            self._gpio[PCF_D7],
+            cols,
+            lines,
+            backlight=self._gpio[PCF_BL],
             invert_polarity=False,
-            enable_pwm=False,
-            gpio=self._gpio)
+            enable_pwm=False
+        )
 
     def _storepinmap(self, pinmap):
         try:

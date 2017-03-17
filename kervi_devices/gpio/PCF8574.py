@@ -40,7 +40,7 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
             "Bad address for PCF8574(A): 0x%02X not in range [0x20..0x27, 0x38..0x3F]" % address
         if self.__name__[0] != 'P':
             raise ValueError(self.__name__)
-        
+
         # Buffer register values so they can be changed without reading.
         self.iodir = 0xFF  # Default direction to all inputs is in
         self.gpio = 0x00
@@ -53,12 +53,6 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
     @property
     def num_gpio(self):
         return 8
-
-    def _write_pins(self):
-        self.i2c.write_raw8(self.gpio | self.iodir)
-
-    def _read_pins(self):
-        return self.i2c.read_raw8() & self.iodir
 
     def define_as_input(self, channel, pull=None):
         self._validate_channel(channel)
@@ -79,3 +73,9 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
         self._validate_channel(pin)
         inp = self._read_pins()
         return bool(inp & (1<<pin))
+
+    def _write_pins(self):
+        self.i2c.write_raw8(self.gpio | self.iodir)
+
+    def _read_pins(self):
+        return self.i2c.read_raw8() & self.iodir
