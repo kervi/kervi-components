@@ -80,10 +80,20 @@ class PCA9685DeviceDriver(I2CGPIODeviceDriver):
         self.i2c.write8(MODE1, mode1)
         time.sleep(0.005)  # wait for oscillator
 
-    
     @property
     def device_name(self):
         return "PFC8591"
+
+    def set(self, pin, value):
+        if (pin < 0) or (pin > 15):
+            raise NameError('PWM pin must be between 0 and 15 inclusive')
+
+        if value == 0 or value == False:
+            self.set_pwm(pin, 0, 4096)
+        elif value == 1 or value == True:
+            self.set_pwm(pin, 4096, 0)
+        else:
+            raise NameError("PCA9685 Value error")
 
     def define_as_pwm(self, channel, frequency, duty_cycle=None):
         """
@@ -104,8 +114,7 @@ class PCA9685DeviceDriver(I2CGPIODeviceDriver):
 
         :type channel: ``int``
         """
-        raise NotImplementedError
-
+        pass
 
     def pwm_start(self, channel, duty_cycle=None, frequency=None):
         """
@@ -129,16 +138,16 @@ class PCA9685DeviceDriver(I2CGPIODeviceDriver):
         :type frequency: ``int``
 
         """
-        raise NotImplementedError
+        if frequency:
+            self.set_pwm_freq(frequency)
+        self.set_pwm(channel, 0, int(4096 * (duty_cycle/100)))
 
     def pwm_stop(self, channel):
         """
         Stop pwm signal on channel.
         """
-        raise NotImplementedError
+        self.set_pwm(channel, 4096, 0)
 
-
-    
     def set_pwm_freq(self, freq_hz):
         """Set the PWM frequency to the provided value in hertz."""
         prescaleval = 25000000.0    # 25MHz

@@ -9,6 +9,8 @@ class DummySensorDeviceDriver(SensorDeviceDriver):
         self.value += self.delta
         if self.value == 100:
             self.delta *= -1
+        if self.value == 0:
+            self.delta *= -1
         return self.value
 
     def type(self):

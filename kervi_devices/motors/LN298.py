@@ -1,6 +1,6 @@
-from kervi.hal.dc_motor_controller import DCMotorControllerBase
+from kervi.hal.motor_controller import MotorControllerBoard, DCMotorControllerBase, StepperMotorControllerBase
 
-class LN298MotorController(DCMotorControllerBase):
+class _DCMotorController(DCMotorControllerBase):
     def __init__(self, ena, in1, in2, enb, in3, in4):
         DCMotorControllerBase.__init__(self, "LN298", 2)
 
@@ -37,3 +37,11 @@ class LN298MotorController(DCMotorControllerBase):
             en.pwm_start(abs(speed))
             in1.set(False)
             in2.set(True)
+
+
+class LN298MotorControllerBoard(MotorControllerBoard):
+    def __init__(self, ena, in1, in2, enb, in3, in4):
+        MotorControllerBoard.__init__(
+            self,
+            dc_controller=_DCMotorController(ena, in1, in2, enb, in3, in4)
+        )

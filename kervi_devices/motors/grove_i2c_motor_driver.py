@@ -1,7 +1,7 @@
 
 
 from kervi.hal import i2c
-from kervi.hal.dc_motor_controller import DCMotorControllerBase
+from kervi.hal.motor_controller import MotorControllerBoard, DCMotorControllerBase, StepperMotorControllerBase
 
 MOTOR_SPEED_SET = 0x82
 PWM_FREQUENCE_SET = 0x84
@@ -19,7 +19,7 @@ BOTH_ANTI_CLOCK_WISE = 0x05
 M1_CW_M2_ACW = 0x06
 M1_ACW_M2CW = 0x09
 
-class MotorDeviceDriver(DCMotorControllerBase):
+class _DCMotorDeviceDriver(DCMotorControllerBase):
     def __init__(self, address=I2C_MOTOR_DRIVER_ADD, bus=None):
         DCMotorControllerBase.__init__(self, "Grove i2c motor driver", 2)
         self.i2c = i2c(address, bus)
@@ -58,3 +58,40 @@ class MotorDeviceDriver(DCMotorControllerBase):
 
         self.i2c.write_list(MOTOR_SPEED_SET, [self.m1_speed, self.m2_speed])
         self.i2c.write_list(DIRECTION_SET, [direction, NOTHING])
+
+class _StepperMotorDeviceDriver(StepperMotorControllerBase):
+    def __init__(self, address, bus=None):
+        DCMotorControllerBase.__init__(self, "Grove i2c motor driver", 2)
+        self.i2c = i2c(address, bus)
+
+    def step(num_step):
+        bus.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, STEPERNU, [num_step, NOTHING])
+
+        ## Enanble the i2c motor driver to drive a 4-wire stepper. the i2c motor driver will
+        ## driver a 4-wire with 8 polarity  .
+        ## Direction: stepper direction ; 1/0
+        ## motor speed: defines the time interval the i2C motor driver change it output to drive the stepper
+        ## the actul interval time is : motorspeed * 4ms. that is , when motor speed is 10, the interval time 
+        ## would be 40 ms
+
+    def run(step_interval):
+        if step_interval > 0:
+            direction = 1
+        else:
+            direction = 0
+
+        speed = abs(int(step_interval / 4))
+        bus.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, ENABLE_STEPPER, [direction, speed])
+
+    ##function to uneanble i2C motor drive to drive the stepper.
+    def stop():
+        bus.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, UNENABLE_STEPPER, [NOTHING, NOTHING])
+
+
+class GroveMotorController(MotorControllerBoard):
+    def __init__(self, address, bus=None):
+        MotorControllerBoard.__init__(
+            self,
+            dc_controller=_DCMotorDeviceDriver(address, bus),
+            stepper_controller=_StepperMotorDeviceDriver(address, bus)
+        )
