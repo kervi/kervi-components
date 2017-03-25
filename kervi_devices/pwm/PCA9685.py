@@ -19,8 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import time
 from __future__ import division
+import time
 import math
 from kervi.hal import I2CGPIODeviceDriver, DeviceChannelOutOfBoundsError, DACValueOutOfBoundsError
 from kervi.hal import ChannelPollingThread
@@ -75,7 +75,7 @@ class PCA9685DeviceDriver(I2CGPIODeviceDriver):
         self.i2c.write8(MODE2, OUTDRV)
         self.i2c.write8(MODE1, ALLCALL)
         time.sleep(0.005)  # wait for oscillator
-        mode1 = self.i2c.readU8(MODE1)
+        mode1 = self.i2c.read_U8(MODE1)
         mode1 = mode1 & ~SLEEP  # wake up (reset sleep)
         self.i2c.write8(MODE1, mode1)
         time.sleep(0.005)  # wait for oscillator
@@ -158,7 +158,7 @@ class PCA9685DeviceDriver(I2CGPIODeviceDriver):
         logger.debug('Estimated pre-scale: {0}'.format(prescaleval))
         prescale = int(math.floor(prescaleval + 0.5))
         logger.debug('Final pre-scale: {0}'.format(prescale))
-        oldmode = self.i2c.readU8(MODE1)
+        oldmode = self.i2c.read_U8(MODE1)
         newmode = (oldmode & 0x7F) | 0x10    # sleep
         self.i2c.write8(MODE1, newmode)  # go to sleep
         self.i2c.write8(PRESCALE, prescale)

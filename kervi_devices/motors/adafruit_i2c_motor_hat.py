@@ -1,7 +1,7 @@
 
 import time
 
-from kervi_devices.pwm import PCA9685DeviceDriver
+from kervi_devices.pwm.PCA9685 import PCA9685DeviceDriver
 from kervi.hal.motor_controller import MotorControllerBoard, DCMotor, DCMotorControllerBase, StepperMotor, StepperMotorControllerBase
 
 
@@ -60,11 +60,21 @@ class _DCMotor(DCMotor):
 class _DCMotorController(DCMotorControllerBase):
     def __init__(self, pwm):
         self.pwm = pwm
-        DCMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat", 4)
+        DCMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat:dc", 4)
+        self._motors = []
 
-    def __getitem__(self, motor):
-        return _DCMotor(self.pwm, motor)
 
+    def __getitem__(self, motor_num):
+        for motor in self._motors:
+            if motor.motornum == motor_num:
+                return motor
+        motor = _DCMotor(self.pwm, motor_num)
+        self._motors += [motor]
+        return motor
+
+    def stop_all(self):
+        for motor in self._motors:
+            motor.run(0)
 
 class _StepperMotor(StepperMotor):
     MICROSTEPS = 8
@@ -233,7 +243,7 @@ class _StepperMotor(StepperMotor):
 class _StepperMotorController(StepperMotorControllerBase):
     def __init__(self, pwm):
         self.pwm = pwm
-        StepperMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat", 2)
+        StepperMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat:servo", 2)
 
     def __getitem__(self, motor):
         return _StepperMotor(self.pwm, motor)
@@ -245,6 +255,7 @@ class AdafruitMotorHAT(MotorControllerBoard):
 
         MotorControllerBoard.__init__(
             self,
+            "Adafruit DC + Stepper hat",
             dc_controller=_DCMotorController(self.pwm),
             stepper_controller=_StepperMotorController(self.pwm)
         )
