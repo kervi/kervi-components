@@ -44,7 +44,7 @@ class _DCMotor(DCMotor):
         self.IN1pin = in1
         self.IN2pin = in2
 
-    def run(self, speed):
+    def set_speed(self, speed):
         if speed > 0:
             self.pwm_device.set(self.IN2pin, 0)
             self.pwm_device.set(self.IN1pin, 1)
@@ -74,10 +74,10 @@ class _DCMotorController(DCMotorControllerBase):
 
     def stop_all(self):
         for motor in self._motors:
-            motor.run(0)
+            motor.set_speed(0)
 
 class _StepperMotor(StepperMotor):
-    MICROSTEPS = 8
+
     MICROSTEP_CURVE = [0, 50, 98, 142, 180, 212, 236, 250, 255]
 
     #MICROSTEPS = 16
@@ -85,15 +85,9 @@ class _StepperMotor(StepperMotor):
     #MICROSTEP_CURVE = [0, 25, 50, 74, 98, 120, 141, 162, 180, 197, 212, 225, 236, 244, 250, 253, 255]
 
     def __init__(self, pwm_device, num, steps=200):
+        StepperMotor.__init__(self, pwm_device, num)
         self.pwm = pwm_device
         self.revsteps = steps
-        self.motornum = num
-        self.sec_per_step = 0.1
-        self.steppingcounter = 0
-        self.currentstep = 0
-
-        num -= 1
-
         if num == 0:
             self.PWMA = 8
             self.AIN2 = 9
@@ -111,74 +105,78 @@ class _StepperMotor(StepperMotor):
         else:
             raise NameError('MotorHAT Stepper must be between 1 and 2 inclusive')
 
-    def setSpeed(self, rpm):
-        self.sec_per_step = 60.0 / (self.revsteps * rpm)
-        self.steppingcounter = 0
+    def _release(self):
+        self.pwm.set(self.PWMA, 0)
+        self.pwm.set(self.AIN2, 0)
+        self.pwm.set(self.BIN1, 0)
+        self.pwm.set(self.AIN1, 0)
+        self.pwm.set(self.BIN2, 0)
+        self.pwm.set(self.PWMB, 0)
 
-    def oneStep(self, dir, style):
+    def _step(self, dir, style):
         pwm_a = pwm_b = 255
 
         # first determine what sort of stepping procedure we're up to
-        if style == SINGLE:
-            if (self.currentstep//(self.MICROSTEPS//2)) % 2:
+        if style == self.SINGLE:
+            if (self.current_step//(self.MICROSTEPS//2)) % 2:
                 # we're at an odd step, weird
                 if dir == FORWARD:
-                    self.currentstep += self.MICROSTEPS//2
+                    self.current_step += self.MICROSTEPS//2
                 else:
-                    self.currentstep -= self.MICROSTEPS//2
+                    self.current_step -= self.MICROSTEPS//2
             else:
                 # go to next even step
                 if dir == FORWARD:
-                    self.currentstep += self.MICROSTEPS
+                    self.current_step += self.MICROSTEPS
                 else:
-                    self.currentstep -= self.MICROSTEPS
-        if style == DOUBLE:
-            if not self.currentstep//(self.MICROSTEPS//2) % 2:
+                    self.current_step -= self.MICROSTEPS
+        if style == self.DOUBLE:
+            if not self.current_step//(self.MICROSTEPS//2) % 2:
                 # we're at an even step, weird
                 if dir == FORWARD:
-                    self.currentstep += self.MICROSTEPS//2
+                    self.current_step += self.MICROSTEPS//2
                 else:
-                    self.currentstep -= self.MICROSTEPS//2
+                    self.current_step -= self.MICROSTEPS//2
             else:
                 # go to next odd step
-                if dir == FORWARD:
-                    self.currentstep += self.MICROSTEPS
+                if dir == self.FORWARD:
+                    self.current_step += self.MICROSTEPS
                 else:
-                    self.currentstep -= self.MICROSTEPS
-        if style == INTERLEAVE:
+                    self.current_step -= self.MICROSTEPS
+        if style == self.INTERLEAVE:
             if dir == FORWARD:
-                self.currentstep += self.MICROSTEPS//2
+                self.current_step += self.MICROSTEPS//2
             else:
-                self.currentstep -= self.MICROSTEPS//2
+                self.current_step -= self.MICROSTEPS//2
 
         if style == MICROSTEP:
             if dir == FORWARD:
-                self.currentstep += 1
+                self.current_step += 1
             else:
-                self.currentstep -= 1
+                self.current_step -= 1
 
                 # go to next 'step' and wrap around
-                self.currentstep += self.MICROSTEPS * 4
-                self.currentstep %= self.MICROSTEPS * 4
+                self.current_step += self.MICROSTEPS * 4
+                self.current_step %= self.MICROSTEPS * 4
 
             pwm_a = pwm_b = 0
-            if (self.currentstep >= 0) and (self.currentstep < self.MICROSTEPS):
-                pwm_a = self.MICROSTEP_CURVE[self.MICROSTEPS - self.currentstep]
-                pwm_b = self.MICROSTEP_CURVE[self.currentstep]
-            elif (self.currentstep >= self.MICROSTEPS) and (self.currentstep < self.MICROSTEPS*2):
-                pwm_a = self.MICROSTEP_CURVE[self.currentstep - self.MICROSTEPS]
-                pwm_b = self.MICROSTEP_CURVE[self.MICROSTEPS*2 - self.currentstep]
-            elif (self.currentstep >= self.MICROSTEPS*2) and (self.currentstep < self.MICROSTEPS*3):
-                pwm_a = self.MICROSTEP_CURVE[self.MICROSTEPS*3 - self.currentstep]
-                pwm_b = self.MICROSTEP_CURVE[self.currentstep - self.MICROSTEPS*2]
-            elif (self.currentstep >= self.MICROSTEPS*3) and (self.currentstep < self.MICROSTEPS*4):
-                pwm_a = self.MICROSTEP_CURVE[self.currentstep - self.MICROSTEPS*3]
-                pwm_b = self.MICROSTEP_CURVE[self.MICROSTEPS*4 - self.currentstep]
+            if (self.current_step >= 0) and (self.current_step < self.MICROSTEPS):
+                pwm_a = self.MICROSTEP_CURVE[self.MICROSTEPS - self.current_step]
+                pwm_b = self.MICROSTEP_CURVE[self.current_step]
+            elif (self.current_step >= self.MICROSTEPS) and (self.current_step < self.MICROSTEPS*2):
+                pwm_a = self.MICROSTEP_CURVE[self.current_step - self.MICROSTEPS]
+                pwm_b = self.MICROSTEP_CURVE[self.MICROSTEPS*2 - self.current_step]
+            elif (self.current_step >= self.MICROSTEPS*2) and (self.current_step < self.MICROSTEPS*3):
+                pwm_a = self.MICROSTEP_CURVE[self.MICROSTEPS*3 - self.current_step]
+                pwm_b = self.MICROSTEP_CURVE[self.current_step - self.MICROSTEPS*2]
+            elif (self.current_step >= self.MICROSTEPS*3) and (self.current_step < self.MICROSTEPS*4):
+                pwm_a = self.MICROSTEP_CURVE[self.current_step - self.MICROSTEPS*3]
+                pwm_b = self.MICROSTEP_CURVE[self.MICROSTEPS*4 - self.current_step]
 
 
         # go to next 'step' and wrap around
-        self.currentstep += self.MICROSTEPS * 4
-        self.currentstep %= self.MICROSTEPS * 4
+        self.current_step += self.MICROSTEPS * 4
+        self.current_step %= self.MICROSTEPS * 4
 
         # only really used for microstepping, otherwise always on!
         self.pwm.set_pwm(self.PWMA, 0, pwm_a*16)
@@ -188,13 +186,13 @@ class _StepperMotor(StepperMotor):
         coils = [0, 0, 0, 0]
 
         if style == MICROSTEP:
-            if (self.currentstep >= 0) and (self.currentstep < self.MICROSTEPS):
+            if (self.current_step >= 0) and (self.current_step < self.MICROSTEPS):
                 coils = [1, 1, 0, 0]
-            elif (self.currentstep >= self.MICROSTEPS) and (self.currentstep < self.MICROSTEPS*2):
+            elif (self.current_step >= self.MICROSTEPS) and (self.current_step < self.MICROSTEPS*2):
                 coils = [0, 1, 1, 0]
-            elif (self.currentstep >= self.MICROSTEPS*2) and (self.currentstep < self.MICROSTEPS*3):
+            elif (self.current_step >= self.MICROSTEPS*2) and (self.current_step < self.MICROSTEPS*3):
                 coils = [0, 0, 1, 1]
-            elif (self.currentstep >= self.MICROSTEPS*3) and (self.currentstep < self.MICROSTEPS*4):
+            elif (self.current_step >= self.MICROSTEPS*3) and (self.current_step < self.MICROSTEPS*4):
                 coils = [1, 0, 0, 1]
         else:
             step2coils = [
@@ -207,7 +205,7 @@ class _StepperMotor(StepperMotor):
                 [0, 0, 0, 1],
                 [1, 0, 0, 1]
             ]
-            coils = step2coils[self.currentstep//(self.MICROSTEPS//2)]
+            coils = step2coils[self.current_step//(self.MICROSTEPS//2)]
 
         #print "coils state = " + str(coils)
         self.pwm.set(self.AIN2, coils[0])
@@ -215,30 +213,7 @@ class _StepperMotor(StepperMotor):
         self.pwm.set(self.AIN1, coils[2])
         self.pwm.set(self.BIN2, coils[3])
 
-        return self.currentstep
-
-    def step(self, steps, direction, stepstyle):
-        s_per_s = self.sec_per_step
-        lateststep = 0
-
-        if stepstyle == INTERLEAVE:
-            s_per_s = s_per_s / 2.0
-        if stepstyle == MICROSTEP:
-            s_per_s /= self.MICROSTEPS
-            steps *= self.MICROSTEPS
-
-        print("{} sec per step".format(s_per_s))
-
-        for s in range(steps):
-            lateststep = self.oneStep(direction, stepstyle)
-            time.sleep(s_per_s)
-
-        if stepstyle == MICROSTEP:
-            # this is an edge case, if we are in between full steps, lets just keep going
-            # so we end on a full step
-            while (lateststep != 0) and (lateststep != self.MICROSTEPS):
-                lateststep = self.oneStep(direction, stepstyle)
-                time.sleep(s_per_s)
+        return self.current_step
 
 class _StepperMotorController(StepperMotorControllerBase):
     def __init__(self, pwm):
