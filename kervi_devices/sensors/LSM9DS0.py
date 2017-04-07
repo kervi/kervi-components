@@ -281,44 +281,7 @@ class LSM9DS0AcclDeviceDriver(I2CSensorDeviceDriver):
         self.mag = LSM9DS0RawMagDeviceDriver(address, bus)
 
 
-class LSM9DS0PitchRollDeviceDriver(I2CSensorDeviceDriver):
-    def __init__(self, is_flipped=False, address=I2C_ACCL_ADDRESS, bus=None):
-        self.accl = LSM9DS0RawAcclDeviceDriver(address, bus)
-        self.mag = LSM9DS0RawMagDeviceDriver(address, bus)
-
-        self.is_flipped = is_flipped
-
-    @property
-    def dimensions(self):
-        return 2
-
-    @property
-    def type(self):
-        return "pitch/roll"
-
-    @property
-    def unit(self):
-        return "degree"
-
-    def read_value(self):
-
-        acc_raw = list(self.accl.read_value())
-        
-        if self.is_flipped:
-            acc_raw[0] = -acc_raw[0]
-            acc_raw[1] = -acc_raw[1]
-
-        #Normalize accelerometer raw values.
-        acc_x_norm = acc_raw[0] / math.sqrt(acc_raw[0] * acc_raw[0] + acc_raw[1] * acc_raw[1] + acc_raw[2] * acc_raw[2])
-        acc_y_norm = acc_raw[1] / math.sqrt(acc_raw[0] * acc_raw[0] + acc_raw[1] * acc_raw[1] + acc_raw[2] * acc_raw[2])
-
-        #Calculate pitch and roll
-        pitch = math.asin(acc_x_norm)
-        roll = -math.asin(acc_y_norm / math.cos(pitch))
-
-        return (pitch, roll)
-
-class LSM9DS0CompasDeviceDriver(I2CSensorDeviceDriver):
+class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
     def __init__(self, is_flipped=False, address=I2C_ACCL_ADDRESS, bus=None):
         self.accl = LSM9DS0RawAcclDeviceDriver(address, bus)
         self.mag = LSM9DS0RawMagDeviceDriver(address, bus)
@@ -344,8 +307,16 @@ class LSM9DS0CompasDeviceDriver(I2CSensorDeviceDriver):
         self.acc_raw = [0, 0, 0]
 
     @property
+    def dimensions(self):
+        return 3
+
+    @property
+    def dimension_labels(self):
+        return ["heading","pitch", "roll"]
+    
+    @property
     def type(self):
-        return "compass"
+        return "orientation"
 
     @property
     def unit(self):
@@ -410,7 +381,7 @@ class LSM9DS0CompasDeviceDriver(I2CSensorDeviceDriver):
         if heading < 0:
             heading += 360
 
-        return heading
+        return [heading, pitch, roll]
 
 class LSM9DS0GravityDeviceDriver(I2CSensorDeviceDriver):
     def __init__(self, is_flipped=False, address=I2C_ACCL_ADDRESS, bus=None):
@@ -419,6 +390,10 @@ class LSM9DS0GravityDeviceDriver(I2CSensorDeviceDriver):
     @property
     def dimensions(self):
         return 3
+    
+    @property
+    def dimension_labels(self):
+        return ["x","y", "z"]
     
     @property
     def type(self):
@@ -430,5 +405,5 @@ class LSM9DS0GravityDeviceDriver(I2CSensorDeviceDriver):
     
     def read_value(self):
         acc_x, acc_y, acc_z = self.accl.read_value()
-        return ((acc_x * 0.224)/1000, (acc_y * 0.224)/1000, (acc_z * 0.224)/1000)
+        return [(acc_x * 0.224)/1000, (acc_y * 0.224)/1000, (acc_z * 0.224)/1000]
     

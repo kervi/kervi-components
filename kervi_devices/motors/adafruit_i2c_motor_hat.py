@@ -4,7 +4,6 @@ import time
 from kervi_devices.pwm.PCA9685 import PCA9685DeviceDriver
 from kervi.hal.motor_controller import MotorControllerBoard, DCMotor, DCMotorControllerBase, StepperMotor, StepperMotorControllerBase
 
-
 FORWARD = 1
 BACKWARD = 2
 BRAKE = 3
@@ -15,66 +14,47 @@ DOUBLE = 2
 INTERLEAVE = 3
 MICROSTEP = 4
 
+class _DCMotorController(DCMotorControllerBase):
+    def __init__(self, pwm):
+        self.pwm_device = pwm
+        DCMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat:dc", 4)
 
-class _DCMotor(DCMotor):
-    def __init__(self, pwm_device, num):
-        self.pwm_device = pwm_device
-        self.motornum = num
+    def _set_speed(self, motor, speed):
         pwm = in1 = in2 = 0
 
-        if num == 0:
+        if motor == 0:
             pwm = 8
             in2 = 9
             in1 = 10
-        elif num == 1:
+        elif motor == 1:
             pwm = 13
             in2 = 12
             in1 = 11
-        elif num == 2:
+        elif motor == 2:
             pwm = 2
             in2 = 3
             in1 = 4
-        elif num == 3:
+        elif motor == 3:
             pwm = 7
             in2 = 6
             in1 = 5
         else:
             raise NameError('MotorHAT Motor must be between 1 and 4 inclusive')
-        self.PWMpin = pwm
-        self.IN1pin = in1
-        self.IN2pin = in2
+        pwm_pin = pwm
+        in1_pin = in1
+        in2_pin = in2
 
-    def set_speed(self, speed):
         if speed > 0:
-            self.pwm_device.set(self.IN2pin, 0)
-            self.pwm_device.set(self.IN1pin, 1)
+            self.pwm_device.set(in2_pin, 0)
+            self.pwm_device.set(in1_pin, 1)
         if speed < 0:
-            self.pwm_device.set(self.IN1pin, 0)
-            self.pwm_device.set(self.IN2pin, 1)
+            self.pwm_device.set(in1_pin, 0)
+            self.pwm_device.set(in2_pin, 1)
         if speed == 0:
-            self.pwm_device.set(self.IN1pin, 0)
-            self.pwm_device.set(self.IN2pin, 0)
+            self.pwm_device.set(in1_pin, 0)
+            self.pwm_device.set(in2_pin, 0)
 
-        self.pwm_device.set_pwm(self.PWMpin, 0, abs(int(4095 * (speed/100))))
-
-class _DCMotorController(DCMotorControllerBase):
-    def __init__(self, pwm):
-        self.pwm = pwm
-        DCMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat:dc", 4)
-        self._motors = []
-
-
-    def __getitem__(self, motor_num):
-        for motor in self._motors:
-            if motor.motornum == motor_num:
-                return motor
-        motor = _DCMotor(self.pwm, motor_num)
-        self._motors += [motor]
-        return motor
-
-    def stop_all(self):
-        for motor in self._motors:
-            motor.set_speed(0)
+        self.pwm_device.set_pwm(pwm_pin, 0, abs(int(4095 * (speed/100))))
 
 class _StepperMotor(StepperMotor):
 
