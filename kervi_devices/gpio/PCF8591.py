@@ -4,13 +4,14 @@
 import time
 from kervi.hal import I2CGPIODeviceDriver, DeviceChannelOutOfBoundsError, DACValueOutOfBoundsError
 from kervi.hal import ChannelPollingThread
+from kervi.hal.gpio import CHANNEL_TYPE_GPIO, CHANNEL_TYPE_ANALOG_IN, CHANNEL_TYPE_ANALOG_OUT
 from kervi.utility.thread import KerviThread
 from kervi import spine
 AIN0 = 0
 AIN1 = 1
 AIN2 = 2
 AIN3 = 3
-AOUT = 0
+AOUT = 4
 
 class PCF8591Driver(I2CGPIODeviceDriver):
 
@@ -20,9 +21,17 @@ class PCF8591Driver(I2CGPIODeviceDriver):
         self._dac_enabled = 0x00
         self._listeners = []
 
+    def _get_channel_type(self, channel):
+        if channel < 4:
+            return CHANNEL_TYPE_ANALOG_IN
+        else:
+            return CHANNEL_TYPE_ANALOG_OUT
+    
     @property
     def device_name(self):
         return "PFC8591"
+
+    
 
     def get(self, channel):
         """Read single ADC Channel"""

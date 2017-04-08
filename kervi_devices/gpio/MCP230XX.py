@@ -22,8 +22,9 @@
 #This file is a modified version of Tony DiCola's work adapted to the Kervi i2c and sensors api. 
 
 import time
-from kervi.hal import I2CGPIODeviceDriver
 import math
+from kervi.hal import I2CGPIODeviceDriver
+from kervi.hal.gpio import CHANNEL_TYPE_GPIO
 
 I2CADDR = 0x20
 
@@ -45,6 +46,9 @@ class _MCP230XX(I2CGPIODeviceDriver):
         self._write_iodir()
         self._write_gppu()
 
+    def _get_channel_type(self, channel):
+        return CHANNEL_TYPE_GPIO
+    
     @property
     def device_name(self):
         return self._device_name

@@ -20,7 +20,7 @@ SOFTWARE.'''
 
 
 from kervi.hal import I2CGPIODeviceDriver
-
+from kervi.hal.gpio import CHANNEL_TYPE_GPIO
 
 IN = 1
 OUT = 0
@@ -46,6 +46,9 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
         self.gpio = 0x00
         self._write_pins()
 
+    def _get_channel_type(self, channel):
+        return CHANNEL_TYPE_GPIO
+    
     @property
     def device_name(self):
         return self.__name__
