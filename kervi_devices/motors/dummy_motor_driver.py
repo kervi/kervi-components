@@ -1,8 +1,8 @@
 from kervi.hal.motor_controller import MotorControllerBoard, ServoMotorControllerBase, DCMotorControllerBase, StepperMotorControllerBase
 
 class _DummyDCMotorDeviceDriver(DCMotorControllerBase):
-    def __init__(self):
-        DCMotorControllerBase.__init__(self, "Dummy dc motor driver", 2)
+    def __init__(self, controller_id, controller_name):
+        DCMotorControllerBase.__init__(self, controller_id , controller_name, 2)
 
     def _set_speed(self, motor, speed):
         print("set speed:", motor, speed)
@@ -30,11 +30,13 @@ class _DummyServoController(ServoMotorControllerBase):
         print("servo set position", channel, position)
 
 class DummyMotorBoard(MotorControllerBoard):
-    def __init__(self):
+    def __init__(self, board_id="dummy_motors", board_name="Dummy motor board"):
+        
         MotorControllerBoard.__init__(
             self,
-            "Dummy motor board",
-            dc_controller=_DummyDCMotorDeviceDriver(),
+            board_id,
+            board_name,
+            dc_controller=_DummyDCMotorDeviceDriver(board_id + ".dc_motors", board_name + "-DC motors"),
             stepper_controller=_DummyStepperMotorDeviceDriver(),
             servo_controller = _DummyServoController(),
         )

@@ -26,6 +26,7 @@ setup(
         "kervi_devices/sensors"
     ],
     install_requires=[
-        'psutil'
+        'psutil',
+        'pyspectator'
     ]
 )

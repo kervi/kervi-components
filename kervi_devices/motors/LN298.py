@@ -40,8 +40,10 @@ class _DCMotorController(DCMotorControllerBase):
 
 
 class LN298MotorControllerBoard(MotorControllerBoard):
-    def __init__(self, ena, in1, in2, enb, in3, in4):
+    def __init__(self, ena, in1, in2, enb, in3, in4, board_id="LN298", board_name="LN298"):
         MotorControllerBoard.__init__(
             self,
+            board_id,
+            board_name,
             dc_controller=_DCMotorController(ena, in1, in2, enb, in3, in4)
         )

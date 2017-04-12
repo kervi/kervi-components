@@ -22,11 +22,14 @@ class PCF8591Driver(I2CGPIODeviceDriver):
         self._listeners = []
 
     def _get_channel_type(self, channel):
-        if channel < 4:
+        if channel in ["AIN1", "AIN2", "AIN3", "AIN4", "AOUT"]:
             return CHANNEL_TYPE_ANALOG_IN
-        else:
+        elif channel == "AOUT":
             return CHANNEL_TYPE_ANALOG_OUT
-    
+
+    def _get_channel_names(self):
+        return ["AIN1", "AIN2", "AIN3", "AIN4", "AOUT"]
+
     @property
     def device_name(self):
         return "PFC8591"

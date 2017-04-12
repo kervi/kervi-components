@@ -48,7 +48,10 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
 
     def _get_channel_type(self, channel):
         return CHANNEL_TYPE_GPIO
-    
+
+    def _get_channel_names(self):
+        return ["1", "2", "3", "4", "5", "6", "7", "8"]
+
     @property
     def device_name(self):
         return self.__name__

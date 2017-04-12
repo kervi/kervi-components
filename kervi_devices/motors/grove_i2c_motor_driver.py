@@ -89,9 +89,11 @@ class _StepperMotorDeviceDriver(StepperMotorControllerBase):
 
 
 class GroveMotorController(MotorControllerBoard):
-    def __init__(self, address, bus=None):
+    def __init__(self, address, bus=None, board_id="grove_motor_controller", board_name="Grove motor controller"):
         MotorControllerBoard.__init__(
             self,
+            board_id,
+            board_name,
             dc_controller=_DCMotorDeviceDriver(address, bus),
             stepper_controller=_StepperMotorDeviceDriver(address, bus)
         )
