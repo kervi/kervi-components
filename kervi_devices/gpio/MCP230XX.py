@@ -33,8 +33,8 @@ class _MCP230XX(I2CGPIODeviceDriver):
     GPIO     = 0x12
     GPPU     = 0x0C
 
-    def __init__(self, device_name, num_gpio, address=I2CADDR, bus=0):
-        I2CGPIODeviceDriver.__init__(self, address, bus)
+    def __init__(self, device_name, num_gpio, address=I2CADDR, bus=0, gpio_id="MCP230XX"):
+        I2CGPIODeviceDriver.__init__(self, address, bus, gpio_id)
         self._num_gpio = num_gpio
         self._device_name = device_name
         self.gpio_bytes = int(math.ceil(num_gpio/8.0))

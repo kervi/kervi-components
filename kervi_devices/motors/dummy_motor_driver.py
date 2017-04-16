@@ -8,8 +8,8 @@ class _DummyDCMotorDeviceDriver(DCMotorControllerBase):
         print("set speed:", motor, speed)
 
 class _DummyStepperMotorDeviceDriver(StepperMotorControllerBase):
-    def __init__(self):
-        StepperMotorControllerBase.__init__(self, "Dummy stepper motor driver", 2)
+    def __init__(self, controller_id):
+        StepperMotorControllerBase.__init__(self, controller_id, "Dummy stepper motor driver", 2)
         self.steps = 0
 
     def _step(self, motor, style):
@@ -23,8 +23,8 @@ class _DummyStepperMotorDeviceDriver(StepperMotorControllerBase):
 
 
 class _DummyServoController(ServoMotorControllerBase):
-    def __init__(self):
-        ServoMotorControllerBase.__init__(self, "Dummy servo controller", 4)
+    def __init__(self, controller_id):
+        ServoMotorControllerBase.__init__(self, controller_id, "Dummy servo controller", 4)
 
     def _set_position(self, channel, position, adjust_min=0, adjust_max=0, adjust_center=0):
         print("servo set position", channel, position)
@@ -37,6 +37,6 @@ class DummyMotorBoard(MotorControllerBoard):
             board_id,
             board_name,
             dc_controller=_DummyDCMotorDeviceDriver(board_id + ".dc_motors", board_name + "-DC motors"),
-            stepper_controller=_DummyStepperMotorDeviceDriver(),
-            servo_controller = _DummyServoController(),
+            stepper_controller=_DummyStepperMotorDeviceDriver(board_id + ".stepper_motors"),
+            servo_controller = _DummyServoController(board_id + ".servo_motors"),
         )

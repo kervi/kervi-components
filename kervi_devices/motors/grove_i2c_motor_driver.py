@@ -20,8 +20,8 @@ M1_CW_M2_ACW = 0x06
 M1_ACW_M2CW = 0x09
 
 class _DCMotorDeviceDriver(DCMotorControllerBase):
-    def __init__(self, address=I2C_MOTOR_DRIVER_ADD, bus=None):
-        DCMotorControllerBase.__init__(self, "Grove i2c motor driver", 2)
+    def __init__(self, controller_id, address=I2C_MOTOR_DRIVER_ADD, bus=None):
+        DCMotorControllerBase.__init__(self, controller_id, "Grove i2c motor driver", 2)
         self.i2c = i2c(address, bus)
         self.m1_speed = 0
         self.m2_speed = 0
@@ -60,8 +60,8 @@ class _DCMotorDeviceDriver(DCMotorControllerBase):
         self.i2c.write_list(DIRECTION_SET, [direction, NOTHING])
 
 class _StepperMotorDeviceDriver(StepperMotorControllerBase):
-    def __init__(self, address, bus=None):
-        DCMotorControllerBase.__init__(self, "Grove i2c motor driver", 2)
+    def __init__(self, controller_id, address, bus=None):
+        StepperMotorControllerBase.__init__(self, controller_id, "Grove i2c motor driver", 2)
         self.i2c = i2c(address, bus)
 
     def step(num_step):
@@ -94,6 +94,6 @@ class GroveMotorController(MotorControllerBoard):
             self,
             board_id,
             board_name,
-            dc_controller=_DCMotorDeviceDriver(address, bus),
-            stepper_controller=_StepperMotorDeviceDriver(address, bus)
+            dc_controller=_DCMotorDeviceDriver(board_id + ".dc_motors",address, bus),
+            stepper_controller=_StepperMotorDeviceDriver(board_id + ".stepper_motors",address, bus)
         )

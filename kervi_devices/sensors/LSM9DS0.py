@@ -285,6 +285,7 @@ class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
     def __init__(self, is_flipped=False, address=I2C_ACCL_ADDRESS, bus=None):
         self.accl = LSM9DS0RawAcclDeviceDriver(address, bus)
         self.mag = LSM9DS0RawMagDeviceDriver(address, bus)
+        self.gyro = LSM9DS0RawGyroDeviceDriver(address, bus)
 
         self.is_flipped = is_flipped
 
@@ -305,6 +306,16 @@ class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
 
         self.mag_raw = [0, 0, 0]
         self.acc_raw = [0, 0, 0]
+        self.gyro_raw = [0, 0, 0]
+
+        self.gyro_x = 0
+        self.gyro_y = 0
+        self.gyro_z = 0
+
+        self.cf_angle_x = 0
+        self.cf_angle_y = 0
+
+        self.last_reading = None
 
     @property
     def dimensions(self):
@@ -326,6 +337,25 @@ class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
 
         self.mag_raw = list(self.mag.read_value())
         self.acc_raw = list(self.accl.read_value())
+        self.gyro_raw = list(self.gyro.read_value)
+
+        rate_gyr_x = self.gyro_raw[0] * G_GAIN
+        rate_gyr_y = self.gyro_raw[1] * G_GAIN
+        rate_gyr_z = self.gyro_raw[2] * G_GAIN
+
+        acc_x_angle = (math.atan2(self.acc_raw[1],self.acc_raw[2])+math.pi)*RAD_TO_DEG
+        acc_y_angle = (math.atan2(self.acc_raw[2],self.acc_raw[0])+math.pi)*RAD_TO_DEG
+        
+        if not last_reading:
+            self.gyro_x = rate_gyr_x
+            self.gyro_y = rate_gyr_y
+            self.gyro_z = rate_gyr_z
+        else:
+            dt = time() - self.last_reading
+            self.cf_angle_x = AA * (self.cf_angle_x+rate_gyr_x*DT) + (1 - AA) * acc_x_angle
+            self.cf_angle_y = AA * (self.cf_angle_y+rate_gyr_y*DT) + (1 - AA) * acc_y_angle
+
+        self.last_reading = time()
 
         self.mag_raw[0] = self.mag_raw[0] * MAG_LPF_FACTOR + self.old_x_mag_raw_value*(1 - MAG_LPF_FACTOR)
         self.mag_raw[1] = self.mag_raw[1] * MAG_LPF_FACTOR + self.old_y_mag_raw_value*(1 - MAG_LPF_FACTOR)
@@ -366,10 +396,14 @@ class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
         accXnorm = self.acc_raw[0] / math.sqrt(self.acc_raw[0] * self.acc_raw[0] + self.acc_raw[1] * self.acc_raw[1] + self.acc_raw[2] * self.acc_raw[2])
         accYnorm = self.acc_raw[1] / math.sqrt(self.acc_raw[0] * self.acc_raw[0] + self.acc_raw[1] * self.acc_raw[1] + self.acc_raw[2] * self.acc_raw[2])
 
-        #Calculate pitch and roll
-        pitch = math.asin(accXnorm)
-        roll = -math.asin(accYnorm / math.cos(pitch))
+        
 
+        #Calculate pitch and roll
+        #pitch = math.asin(accXnorm)
+        #roll = -math.asin(accYnorm / math.cos(pitch))
+
+        pitch = self.cf_angle_x
+        roll = self.cf_angle_y
         #Calculate the new tilt compensated values
         magXcomp = self.mag_raw[0] * math.cos(pitch) + self.mag_raw[2] * math.sin(pitch)
         magYcomp = self.mag_raw[0] * math.sin(roll) * math.sin(pitch) + self.mag_raw[1] * math.cos(roll) - self.mag_raw[2] * math.sin(roll) * math.cos(pitch)

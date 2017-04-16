@@ -32,8 +32,8 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
     """
     Class to represent a PCF8574 or PCF8574A GPIO extender.
     """
-    def __init__(self, address=0x27, bus=None):
-        I2CGPIODeviceDriver.__init__(self, address, bus)
+    def __init__(self, address=0x27, bus=None, gpio_id="PCF8574"):
+        I2CGPIODeviceDriver.__init__(self, address, bus, gpio_id)
         self.__name__ = \
             "PCF8574" if address in range(0x20, 0x28) else \
             "PCF8574A" if address in range(0x38, 0x40) else \

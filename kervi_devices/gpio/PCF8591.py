@@ -16,8 +16,8 @@ AOUT = 4
 class PCF8591Driver(I2CGPIODeviceDriver):
 
     # Constructor
-    def __init__(self, address = 0x48, bus=0):
-        I2CGPIODeviceDriver.__init__(self, address, bus)
+    def __init__(self, address = 0x48, bus=0, gpio_id="PCF8591"):
+        I2CGPIODeviceDriver.__init__(self, address, bus, gpio_id)
         self._dac_enabled = 0x00
         self._listeners = []
 

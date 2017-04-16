@@ -9,8 +9,8 @@ servo_max = 600  # Max pulse length out of 4096
 
 
 class _ServoController(ServoMotorControllerBase):
-    def __init__(self, pwm_device):
-        ServoMotorControllerBase.__init__(self, "PCA9685", 16)
+    def __init__(self, controller_id, pwm_device):
+        ServoMotorControllerBase.__init__(self, controller_id, "PCA9685", 16)
         self.pwm_device = pwm_device
 
     def _set_position(self, channel, position, adjust_min=0, adjust_max=0, adjust_center=0):
@@ -36,6 +36,6 @@ class PCA9685ServoBoard(MotorControllerBoard):
             self,
             board_id,
             board_name,
-            servo_controller=_ServoController(self.pwm),
+            servo_controller=_ServoController(board_id+".servo_motors", self.pwm),
         )
 

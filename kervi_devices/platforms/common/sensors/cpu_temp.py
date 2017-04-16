@@ -12,16 +12,18 @@ class CPUTempSensorDeviceDriver(SensorDeviceDriver):
     def __init__(self):
         try:
             self.cpu = Processor(monitoring_latency=1)
-        except :
+        except:
             self.cpu = None
 
     def read_value(self):
-        try:
-            if self.cpu:
-                print(self.cpu.temperature)
-            return 0
-        except:
-            return 0
+        return 0
+        # try:
+        #     print("cptu",psutil.sensors_temperatures())
+        #     if self.cpu:
+        #         print("cpt:", self.cpu.temperature)
+        #     return 0
+        # except:
+        #     return 0
 
     @property
     def max(self):

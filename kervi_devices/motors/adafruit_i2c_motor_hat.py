@@ -15,9 +15,9 @@ INTERLEAVE = 3
 MICROSTEP = 4
 
 class _DCMotorController(DCMotorControllerBase):
-    def __init__(self, pwm):
+    def __init__(self, controller_id, pwm):
         self.pwm_device = pwm
-        DCMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat:dc", 4)
+        DCMotorControllerBase.__init__(self, controller_id, "Adafruit DC + Stepper hat:dc", 4)
 
     def _set_speed(self, motor, speed):
         pwm = in1 = in2 = 0
@@ -196,9 +196,9 @@ class _StepperMotor(StepperMotor):
         return self.current_step
 
 class _StepperMotorController(StepperMotorControllerBase):
-    def __init__(self, pwm):
+    def __init__(self, controller_id, pwm):
         self.pwm = pwm
-        StepperMotorControllerBase.__init__(self, "Adafruit DC + Stepper hat:servo", 2)
+        StepperMotorControllerBase.__init__(self, controller_id, "Adafruit DC + Stepper hat:servo", 2)
 
     def __getitem__(self, motor):
         return _StepperMotor(self.pwm, motor)
@@ -212,6 +212,6 @@ class AdafruitMotorHAT(MotorControllerBoard):
             self,
             board_id,
             "Adafruit DC + Stepper hat",
-            dc_controller=_DCMotorController(self.pwm),
-            stepper_controller=_StepperMotorController(self.pwm)
+            dc_controller=_DCMotorController(board_id + ".dc_motors",self.pwm),
+            stepper_controller=_StepperMotorController(board_id + ".stepper_motors",self.pwm)
         )

@@ -1,8 +1,8 @@
 from kervi.hal.motor_controller import MotorControllerBoard, DCMotorControllerBase, StepperMotorControllerBase
 
 class _DCMotorController(DCMotorControllerBase):
-    def __init__(self, ena, in1, in2, enb, in3, in4):
-        DCMotorControllerBase.__init__(self, "LN298", 2)
+    def __init__(self, controller_id, ena, in1, in2, enb, in3, in4):
+        DCMotorControllerBase.__init__(self, controller_id, "LN298", 2)
 
         self._motors = [(ena, in1, in2), (enb, in3, in4)]
         for motor in self._motors:
@@ -45,5 +45,5 @@ class LN298MotorControllerBoard(MotorControllerBoard):
             self,
             board_id,
             board_name,
-            dc_controller=_DCMotorController(ena, in1, in2, enb, in3, in4)
+            dc_controller=_DCMotorController(board_id+".dc_motors", ena, in1, in2, enb, in3, in4)
         )

@@ -67,8 +67,8 @@ def software_reset(i2c=None, **kwargs):
 class PCA9685DeviceDriver(I2CGPIODeviceDriver):
     """PCA9685 PWM LED/servo controller."""
 
-    def __init__(self, address=PCA9685_ADDRESS, bus=None):
-        I2CGPIODeviceDriver.__init__(self,address, bus)
+    def __init__(self, address=PCA9685_ADDRESS, bus=None, gpio_id="PCA9685"):
+        I2CGPIODeviceDriver.__init__(self,address, bus, gpio_id)
         """Initialize the PCA9685."""
         # Setup I2C interface for the device.
         self.set_all_pwm(0, 0)
