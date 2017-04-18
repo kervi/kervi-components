@@ -14,6 +14,7 @@ class _ServoController(ServoMotorControllerBase):
         self.pwm_device = pwm_device
 
     def _set_position(self, channel, position, adjust_min=0, adjust_max=0, adjust_center=0):
+        print("sp", channel, position)
         pulse_min = 200 + 200 * adjust_min
         pulse_center = 400 + 400 * adjust_center
         pulse_max = 600 + 600 * adjust_max
@@ -25,6 +26,7 @@ class _ServoController(ServoMotorControllerBase):
         else:
             pulse = (pulse_center - pulse_min) * (position/100.0)
 
+        print("sp", channel, position, int(pulse))
         self.pwm_device.set_pwm(channel, 0, int(pulse))
 
 class PCA9685ServoBoard(MotorControllerBoard):
