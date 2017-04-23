@@ -18,7 +18,6 @@ MAG_Z_MIN = -472
 MAG_LPF_FACTOR = 0.4
 ACC_LPF_FACTOR = 0.1
 
-
 RAD_TO_DEG = 57.29578
 M_PI = 3.14159265358979323846
 G_GAIN = 0.070 # [deg/s/LSB]  If you change the dps for gyro, you need to update this value accordingly
@@ -121,23 +120,23 @@ def kalman_filter_x ( accAngle, gyroRate, DT):
 
 
 class LSM9DS0RawGyroDeviceDriver(I2CSensorDeviceDriver):
-    def __init__(self, address=I2CSensorDeviceDriver, bus=None):
+    def __init__(self, address=I2C_GYRO_ADDRESS, bus=None):
         I2CSensorDeviceDriver.__init__(self, address, bus)
         self.i2c.write8(0x20, 0x0F)
-        self.i2c.write_list(0x6A, 0x23, 0x30)
+        self.i2c.write_list(0x23, [0x30])
 
     def read_value(self):
 
-        data0 = self.i2c.read_U8(0x6A, 0x28)
-        data1 = self.i2c.read_U8(0x6A, 0x29)
+        data0 = self.i2c.read_U8(0x28)
+        data1 = self.i2c.read_U8(0x29)
 
         # Convert the data
         x_gyro = data1 * 256 + data0
         if x_gyro > 32767:
             x_gyro -= 65536
 
-        data0 = self.i2c.read_U8(0x6A, 0x2A)
-        data1 = self.i2c.read_U8(0x6A, 0x2B)
+        data0 = self.i2c.read_U8(0x2A)
+        data1 = self.i2c.read_U8(0x2B)
 
         # Convert the data
         y_gyro = data1 * 256 + data0
@@ -147,8 +146,8 @@ class LSM9DS0RawGyroDeviceDriver(I2CSensorDeviceDriver):
         # LSM9DS0 Gyro address, 0x6A(106)
         # Read data back from 0x2C(44), 2 bytes
         # Z-Axis Gyro LSB, Z-Axis Gyro MSB
-        data0 = self.i2c.read_U8(0x6A, 0x2C)
-        data1 = self.i2c.read_U8(0x6A, 0x2D)
+        data0 = self.i2c.read_U8(0x2C)
+        data1 = self.i2c.read_U8(0x2D)
 
         # Convert the data
         z_gyro = data1 * 256 + data0
@@ -282,10 +281,10 @@ class LSM9DS0AcclDeviceDriver(I2CSensorDeviceDriver):
 
 
 class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
-    def __init__(self, is_flipped=False, address=I2C_ACCL_ADDRESS, bus=None):
-        self.accl = LSM9DS0RawAcclDeviceDriver(address, bus)
-        self.mag = LSM9DS0RawMagDeviceDriver(address, bus)
-        self.gyro = LSM9DS0RawGyroDeviceDriver(address, bus)
+    def __init__(self, is_flipped=False, accl_address=I2C_ACCL_ADDRESS, gyro_address=I2C_GYRO_ADDRESS, bus=None):
+        self.accl = LSM9DS0RawAcclDeviceDriver(accl_address, bus)
+        self.mag = LSM9DS0RawMagDeviceDriver(accl_address, bus)
+        self.gyro = LSM9DS0RawGyroDeviceDriver(gyro_address, bus)
 
         self.is_flipped = is_flipped
 
@@ -337,7 +336,7 @@ class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
 
         self.mag_raw = list(self.mag.read_value())
         self.acc_raw = list(self.accl.read_value())
-        self.gyro_raw = list(self.gyro.read_value)
+        self.gyro_raw = list(self.gyro.read_value())
 
         rate_gyr_x = self.gyro_raw[0] * G_GAIN
         rate_gyr_y = self.gyro_raw[1] * G_GAIN
@@ -346,16 +345,16 @@ class LSM9DS0OrientationDeviceDriver(I2CSensorDeviceDriver):
         acc_x_angle = (math.atan2(self.acc_raw[1],self.acc_raw[2])+math.pi)*RAD_TO_DEG
         acc_y_angle = (math.atan2(self.acc_raw[2],self.acc_raw[0])+math.pi)*RAD_TO_DEG
         
-        if not last_reading:
+        if not self.last_reading:
             self.gyro_x = rate_gyr_x
             self.gyro_y = rate_gyr_y
             self.gyro_z = rate_gyr_z
         else:
-            dt = time() - self.last_reading
-            self.cf_angle_x = AA * (self.cf_angle_x+rate_gyr_x*DT) + (1 - AA) * acc_x_angle
-            self.cf_angle_y = AA * (self.cf_angle_y+rate_gyr_y*DT) + (1 - AA) * acc_y_angle
+            dt = time.time() - self.last_reading
+            self.cf_angle_x = AA * (self.cf_angle_x+rate_gyr_x*dt) + (1 - AA) * acc_x_angle
+            self.cf_angle_y = AA * (self.cf_angle_y+rate_gyr_y*dt) + (1 - AA) * acc_y_angle
 
-        self.last_reading = time()
+        self.last_reading = time.time()
 
         self.mag_raw[0] = self.mag_raw[0] * MAG_LPF_FACTOR + self.old_x_mag_raw_value*(1 - MAG_LPF_FACTOR)
         self.mag_raw[1] = self.mag_raw[1] * MAG_LPF_FACTOR + self.old_y_mag_raw_value*(1 - MAG_LPF_FACTOR)

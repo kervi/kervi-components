@@ -2,7 +2,7 @@ from kervi.hal.motor_controller import MotorControllerBoard, ServoMotorControlle
 
 class _DummyDCMotorDeviceDriver(DCMotorControllerBase):
     def __init__(self, controller_id, controller_name):
-        DCMotorControllerBase.__init__(self, controller_id , controller_name, 2)
+        DCMotorControllerBase.__init__(self, controller_id , controller_name, 4)
 
     def _set_speed(self, motor, speed):
         print("set speed:", motor, speed)
