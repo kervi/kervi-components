@@ -44,8 +44,6 @@ YP_11 = 0.0
 KFangleX = 0.0
 KFangleY = 0.0
 
-
-
 def kalman_filter_y ( accAngle, gyroRate, DT):
 	y=0.0
 	S=0.0

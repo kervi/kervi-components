@@ -206,7 +206,7 @@ class _StepperMotorController(StepperMotorControllerBase):
 class AdafruitMotorHAT(MotorControllerBoard):
     def __init__(self, address=0x60, bus=None, board_id="adafruit_motor_hat"):
         self.pwm = PCA9685DeviceDriver(address, bus)
-        self.pwm.set_pwm_freq(1600)
+        self.pwm.set_pwm_freq(60)
 
         MotorControllerBoard.__init__(
             self,
