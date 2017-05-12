@@ -3,27 +3,17 @@
 
 """ Module that defines core cpu sensors """
 
-from kervi.hal import SensorDeviceDriver
-import psutil
-from pyspectator.processor import Processor
+from kervi.hal import SensorDeviceDriver, HAL_DRIVER_ID
 
 class CPUTempSensorDeviceDriver(SensorDeviceDriver):
     """ Sensor that mesures cpu temp on host """
     def __init__(self):
-        try:
-            self.cpu = Processor(monitoring_latency=1)
-        except:
-            self.cpu = None
+        SensorDeviceDriver.__init__(self)
 
     def read_value(self):
+        if HAL_DRIVER_ID == "kervi_hal_rpi":
+            return int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
         return 0
-        # try:
-        #     print("cptu",psutil.sensors_temperatures())
-        #     if self.cpu:
-        #         print("cpt:", self.cpu.temperature)
-        #     return 0
-        # except:
-        #     return 0
 
     @property
     def max(self):
