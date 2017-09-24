@@ -1,6 +1,6 @@
 
 
-from kervi.hal import i2c
+from kervi.hal import get_i2c
 from kervi.hal.motor_controller import MotorControllerBoard, DCMotorControllerBase, StepperMotorControllerBase
 
 MOTOR_SPEED_SET = 0x82
@@ -22,7 +22,7 @@ M1_ACW_M2CW = 0x09
 class _DCMotorDeviceDriver(DCMotorControllerBase):
     def __init__(self, controller_id, address=I2C_MOTOR_DRIVER_ADD, bus=None):
         DCMotorControllerBase.__init__(self, controller_id, "Grove i2c motor driver", 2)
-        self.i2c = i2c(address, bus)
+        self.i2c = get_i2c(address, bus)
         self.m1_speed = 0
         self.m2_speed = 0
 
@@ -62,10 +62,10 @@ class _DCMotorDeviceDriver(DCMotorControllerBase):
 class _StepperMotorDeviceDriver(StepperMotorControllerBase):
     def __init__(self, controller_id, address, bus=None):
         StepperMotorControllerBase.__init__(self, controller_id, "Grove i2c motor driver", 2)
-        self.i2c = i2c(address, bus)
+        self.i2c = get_i2c(address, bus)
 
-    def step(num_step):
-        bus.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, STEPERNU, [num_step, NOTHING])
+    def step(self, num_step):
+        self.i2c.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, STEPERNU, [num_step, NOTHING])
 
         ## Enanble the i2c motor driver to drive a 4-wire stepper. the i2c motor driver will
         ## driver a 4-wire with 8 polarity  .
@@ -74,18 +74,18 @@ class _StepperMotorDeviceDriver(StepperMotorControllerBase):
         ## the actul interval time is : motorspeed * 4ms. that is , when motor speed is 10, the interval time 
         ## would be 40 ms
 
-    def run(step_interval):
+    def run(self, step_interval):
         if step_interval > 0:
             direction = 1
         else:
             direction = 0
 
         speed = abs(int(step_interval / 4))
-        bus.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, ENABLE_STEPPER, [direction, speed])
+        self.i2c.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, ENABLE_STEPPER, [direction, speed])
 
     ##function to uneanble i2C motor drive to drive the stepper.
-    def stop():
-        bus.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, UNENABLE_STEPPER, [NOTHING, NOTHING])
+    def stop(self):
+        self.i2c.write_i2c_block_data(I2C_MOTOR_DRIVER_ADD, UNENABLE_STEPPER, [NOTHING, NOTHING])
 
 
 class GroveMotorController(MotorControllerBoard):
