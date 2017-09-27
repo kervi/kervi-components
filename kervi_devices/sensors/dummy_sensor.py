@@ -1,7 +1,8 @@
 from kervi.hal import SensorDeviceDriver
 
-class DummySensorDeviceDriver(SensorDeviceDriver):
+class DummySensorDeviceDriverx(SensorDeviceDriver):
     def __init__(self):
+        SensorDeviceDriver.__init__(self)
         self.value = 0
         self.delta = 4
 
@@ -13,9 +14,11 @@ class DummySensorDeviceDriver(SensorDeviceDriver):
             self.delta *= -1
         return self.value
 
+    @property
     def type(self):
         return "counter"
 
+    @property
     def unit(self):
         return "%"
 
