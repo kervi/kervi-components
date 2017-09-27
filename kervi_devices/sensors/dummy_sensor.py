@@ -1,6 +1,6 @@
 from kervi.hal import SensorDeviceDriver
 
-class DummySensorDeviceDriverx(SensorDeviceDriver):
+class DummySensorDeviceDriver(SensorDeviceDriver):
     def __init__(self):
         SensorDeviceDriver.__init__(self)
         self.value = 0
