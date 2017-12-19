@@ -1,6 +1,6 @@
 from kervi import hal
-from kervi_devices.gpio.MCP230XX import MCP23017DeviceDriver
-from kervi_devices.displays.HD44780 import HD44780RGBDeviceDriver
+from kervi.devices.gpio.MCP230XX import MCP23017DeviceDriver
+from kervi.devices.displays.HD44780 import HD44780RGBDeviceDriver
 
 class CharLCDDeviceDriver(HD44780RGBDeviceDriver):
     """Class to represent and interact with an Adafruit Raspberry Pi character

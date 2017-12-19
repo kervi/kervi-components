@@ -1,8 +1,8 @@
 import time
 import kervi.hal as hal
 from kervi.hal.gpio import IGPIODeviceDriver
-from kervi_devices.gpio.PCF8574 import PCF8574DeviceDriver
-from kervi_devices.displays.HD44780 import HD44780DeviceDriver
+from kervi.devices.gpio.PCF8574 import PCF8574DeviceDriver
+from kervi.devices.displays.HD44780 import HD44780DeviceDriver
 
 
 # Char LCD pin to I/O extender GPIO pin number maps

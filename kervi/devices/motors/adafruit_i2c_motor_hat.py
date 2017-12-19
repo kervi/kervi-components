@@ -1,7 +1,7 @@
 
 import time
 
-from kervi_devices.pwm.PCA9685 import PCA9685DeviceDriver
+from kervi.devices.pwm.PCA9685 import PCA9685DeviceDriver
 from kervi.hal.motor_controller import MotorControllerBoard, DCMotor, DCMotorControllerBase, StepperMotor, StepperMotorControllerBase
 
 FORWARD = 1
