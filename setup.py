@@ -1,6 +1,10 @@
 import distutils
 from setuptools import setup
-from kervi.devices.version import VERSION
+
+try:
+    from kervi.devices.version import VERSION
+except:
+    VERSION = "0.0"
 
 try:
     distutils.dir_util.remove_tree("dist")
