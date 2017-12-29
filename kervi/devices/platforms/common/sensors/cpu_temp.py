@@ -11,7 +11,7 @@ class CPUTempSensorDeviceDriver(SensorDeviceDriver):
         SensorDeviceDriver.__init__(self)
 
     def read_value(self):
-        if HAL_DRIVER_ID == "kervi_hal_rpi":
+        if HAL_DRIVER_ID == "kervi.platforms.raspberry":
             return int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
         return 0
 
