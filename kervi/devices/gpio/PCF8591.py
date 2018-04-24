@@ -5,7 +5,7 @@ import time
 from kervi.hal import I2CGPIODeviceDriver, DeviceChannelOutOfBoundsError, DACValueOutOfBoundsError
 from kervi.hal import ChannelPollingThread
 from kervi.hal.gpio import CHANNEL_TYPE_GPIO, CHANNEL_TYPE_ANALOG_IN, CHANNEL_TYPE_ANALOG_OUT
-from kervi.utility.thread import KerviThread
+from kervi.core.utility.thread import KerviThread
 from kervi import spine
 AIN0 = 0
 AIN1 = 1

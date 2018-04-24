@@ -16,11 +16,19 @@ class DummySensorDeviceDriver(SensorDeviceDriver):
 
     @property
     def type(self):
-        return "counter"
+        return "temperature"
 
     @property
     def unit(self):
-        return "%"
+        return "C"
+
+    @property
+    def max(self):
+        return 100
+
+    @property
+    def min(self):
+        return 0
 
 
 class DummyMultiDimSensorDeviceDriver(SensorDeviceDriver):

@@ -24,7 +24,7 @@ import time
 import math
 from kervi.hal import I2CGPIODeviceDriver, DeviceChannelOutOfBoundsError, DACValueOutOfBoundsError
 from kervi.hal import ChannelPollingThread
-from kervi.utility.thread import KerviThread
+from kervi.core.utility.thread import KerviThread
 from kervi import spine
 
 import logging
