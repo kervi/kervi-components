@@ -69,7 +69,10 @@ class TSL2561DeviceDriver(I2CSensorDeviceDriver):
             ambient *= 16
             ir_reading *= 16
 
-        ratio = (ir_reading / float(ambient))
+        if ambient == 0:
+            ratio = 0
+        else:
+            ratio = (ir_reading / float(ambient))
 
         if (ratio >= 0) & (ratio <= 0.52):
             lux = (0.0315 * ambient) - (0.0593 * ambient * (ratio**1.4))
