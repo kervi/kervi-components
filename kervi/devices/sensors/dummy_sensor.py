@@ -42,7 +42,7 @@ class DummyMultiDimSensorDeviceDriver(SensorDeviceDriver):
             self.delta *= -1
         if self.value == 0:
             self.delta *= -1
-        return [self.value, self.value, self.value]
+        return [self.value, self.value + 1, self.value +2]
 
     @property
     def dimensions(self):
