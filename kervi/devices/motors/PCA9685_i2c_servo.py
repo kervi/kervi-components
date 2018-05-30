@@ -15,9 +15,9 @@ class _ServoController(ServoMotorControllerBase):
 
         self._pulse_length = 1000000    # 1,000,000 us per second
         self._pulse_length //= 60       # 60 Hz
-        print('{0}us per period'.format(self._pulse_length))
+        #print('{0}us per period'.format(self._pulse_length))
         self._pulse_length //= 4096     # 12 bits of resolution
-        print('{0}us per bit'.format(self._pulse_length))
+        #print('{0}us per bit'.format(self._pulse_length))
 
     def _set_position(self, channel, position, adjust_min=0, adjust_max=0, adjust_center=0):
         print("sp", channel, position)
