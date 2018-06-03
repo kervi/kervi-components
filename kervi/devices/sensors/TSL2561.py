@@ -20,6 +20,13 @@ class TSL2561DeviceDriver(I2CSensorDeviceDriver):
     def unit(self):
         return "LUX"
 
+    @property
+    def max(self):
+        return 40000
+
+    @property
+    def min(self):
+        return 0
 
     def set_gain(self, gain=1):
         """ Set the gain """

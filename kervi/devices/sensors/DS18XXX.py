@@ -21,3 +21,11 @@ class DS18XXXDeviceDriver(OneWireSensorDeviceDriver):
     @property
     def unit(self):
         return "C"
+
+    @property
+    def max(self):
+        return 125
+
+    @property
+    def min(self):
+        return -30

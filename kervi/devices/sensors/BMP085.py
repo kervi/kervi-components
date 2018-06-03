@@ -177,7 +177,7 @@ class BMP085DeviceDriver(I2CSensorDeviceDriver):
         X2 = (-7357 * p) >> 16
         p = p + ((X1 + X2 + 3791) >> 4)
         self.logger.debug('Pressure {0} Pa', p)
-        return p
+        return p/100
 
     def read_altitude(self, sealevel_pa=101325.0):
         """Calculates the altitude in meters."""
@@ -217,6 +217,25 @@ class BMP085DeviceDriver(I2CSensorDeviceDriver):
         if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
             return "C"
         elif self._sensor_type == BMP085_PRESSURE_SENSOR:
-            return "Pa"
+            return "hPa"
         elif self._sensor_type == BMP085_ALTITUDE_SENSOR:
             return "m"
+
+    @property
+    def max(self):
+        if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
+            return 85
+        elif self._sensor_type == BMP085_PRESSURE_SENSOR:
+            return 1100
+        elif self._sensor_type == BMP085_ALTITUDE_SENSOR:
+            return 9000
+
+
+    @property
+    def min(self):
+        if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
+            return -40
+        elif self._sensor_type == BMP085_PRESSURE_SENSOR:
+            return 300
+        elif self._sensor_type == BMP085_ALTITUDE_SENSOR:
+            return -500
