@@ -155,6 +155,11 @@ class HD44780DeviceDriver(object):
         self.write8(LCD_ENTRYMODESET | self.displaymode)  # set the entry mode
         self.clear()
 
+    @property
+    def display_type(self):
+        return "char"
+    
+
     def home(self):
         """Move the cursor back to its home (first line and first column)."""
         self.write8(LCD_RETURNHOME)  # set cursor position to zero
