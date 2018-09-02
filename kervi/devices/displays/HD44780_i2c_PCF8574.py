@@ -67,7 +67,7 @@ class CharLCDDeviceDriver(HD44780DeviceDriver):
     """Class to represent and interact with an Adafruit Raspberry Pi character
     LCD plate."""
 
-    def __init__(self, address=0x3f, cols=16, lines=2, pin_map=0, busnum=hal.default_i2c_bus()):
+    def __init__(self, pin_map=0, address=0x3f, cols=16, lines=2, busnum=hal.default_i2c_bus()):
         """Initialize the character LCD plate.  Can optionally specify a separate
         I2C address or bus number, but the defaults should suffice for most needs.
         Can also optionally specify the number of columns and lines on the LCD
@@ -92,6 +92,10 @@ class CharLCDDeviceDriver(HD44780DeviceDriver):
             invert_polarity=False,
             enable_pwm=False
         )
+
+    @property
+    def display_type(self):
+        return "char"
 
     def _storepinmap(self, pinmap):
         try:

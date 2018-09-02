@@ -52,6 +52,9 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
     def _get_channel_names(self):
         return ["1", "2", "3", "4", "5", "6", "7", "8"]
 
+    def _map_pin(self, channel):
+        return int(channel)
+
     @property
     def device_name(self):
         return self.__name__
@@ -61,21 +64,25 @@ class PCF8574DeviceDriver(I2CGPIODeviceDriver):
         return 8
 
     def define_as_input(self, channel, pull=None):
-        self._validate_channel(channel)
-        self.iodir = self._bit2(self.iodir, channel, IN)
+        pin = self._map_pin(channel)
+        self._validate_channel(pin)
+        self.iodir = self._bit2(self.iodir, pin, IN)
         self._write_pins()
 
     def define_as_output(self, channel):
-        self._validate_channel(channel)
-        self.iodir = self._bit2(self.iodir, channel, OUT)
+        pin = self._map_pin(channel)
+        self._validate_channel(pin)
+        self.iodir = self._bit2(self.iodir, pin, OUT)
         self._write_pins()
 
-    def set(self, pin, value):
+    def set(self, channel, value):
+        pin = self._map_pin(channel)
         self._validate_channel(pin)
         self.gpio = self._bit2(self.gpio, pin, bool(value))
         self._write_pins()
 
-    def get(self, pin):
+    def get(self, channel):
+        pin = self._map_pin(channel)
         self._validate_channel(pin)
         inp = self._read_pins()
         return bool(inp & (1<<pin))

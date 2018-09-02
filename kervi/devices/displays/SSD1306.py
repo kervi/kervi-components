@@ -186,12 +186,95 @@ class _SSD1306I2CBase(object):
                 contrast = 0xCF
 
 
-class SSD1306_128_64_DeviceDriver(_SSD1306I2CBase):
-    def __init__(self, rst = None, i2c_bus=None, i2c_address=SSD1306_I2C_ADDRESS):
+class SSD1306DeviceDriver(_SSD1306I2CBase):
+    def __init__(self, height, width = 128, rst = None, i2c_bus=None, i2c_address=SSD1306_I2C_ADDRESS):
         # Call base class constructor.
-        super(SSD1306_128_64_DeviceDriver, self).__init__(128, 64, rst, i2c_bus, i2c_address)
+        if height == 64:
+            super(SSD1306DeviceDriver, self).__init__(128, 64, rst, i2c_bus, i2c_address)
+        elif height == 32:
+            super(SSD1306DeviceDriver, self).__init__(128, 32, rst, i2c_bus, i2c_address)
+        elif height == 16: 
+            super(SSD1306DeviceDriver, self).__init__(96, 16, rst, i2c_bus, i2c_address)
+
 
     def _initialize(self):
+        if self.height == 64:
+            self._initialize64()
+        elif self.height == 32:
+            self._initialize32()
+        elif self.height == 16:
+            self._initialize16()
+
+    
+    def _initialize16(self):
+        # 128x32 pixel specific initialization.
+        self.command(SSD1306_DISPLAYOFF)                    # 0xAE
+        self.command(SSD1306_SETDISPLAYCLOCKDIV)            # 0xD5
+        self.command(0x60)                                  # the suggested ratio 0x60
+        self.command(SSD1306_SETMULTIPLEX)                  # 0xA8
+        self.command(0x0F)
+        self.command(SSD1306_SETDISPLAYOFFSET)              # 0xD3
+        self.command(0x0)                                   # no offset
+        self.command(SSD1306_SETSTARTLINE | 0x0)            # line #0
+        self.command(SSD1306_CHARGEPUMP)                    # 0x8D
+        if self._vccstate == SSD1306_EXTERNALVCC:
+            self.command(0x10)
+        else:
+            self.command(0x14)
+        self.command(SSD1306_MEMORYMODE)                    # 0x20
+        self.command(0x00)                                  # 0x0 act like ks0108
+        self.command(SSD1306_SEGREMAP | 0x1)
+        self.command(SSD1306_COMSCANDEC)
+        self.command(SSD1306_SETCOMPINS)                    # 0xDA
+        self.command(0x02)
+        self.command(SSD1306_SETCONTRAST)                   # 0x81
+        self.command(0x8F)
+        self.command(SSD1306_SETPRECHARGE)                  # 0xd9
+        if self._vccstate == SSD1306_EXTERNALVCC:
+            self.command(0x22)
+        else:
+            self.command(0xF1)
+        self.command(SSD1306_SETVCOMDETECT)                 # 0xDB
+        self.command(0x40)
+        self.command(SSD1306_DISPLAYALLON_RESUME)           # 0xA4
+        self.command(SSD1306_NORMALDISPLAY)     
+    
+    def _initialize32(self):
+        # 128x32 pixel specific initialization.
+        self.command(SSD1306_DISPLAYOFF)                    # 0xAE
+        self.command(SSD1306_SETDISPLAYCLOCKDIV)            # 0xD5
+        self.command(0x80)                                  # the suggested ratio 0x80
+        self.command(SSD1306_SETMULTIPLEX)                  # 0xA8
+        self.command(0x1F)
+        self.command(SSD1306_SETDISPLAYOFFSET)              # 0xD3
+        self.command(0x0)                                   # no offset
+        self.command(SSD1306_SETSTARTLINE | 0x0)            # line #0
+        self.command(SSD1306_CHARGEPUMP)                    # 0x8D
+        if self._vccstate == SSD1306_EXTERNALVCC:
+            self.command(0x10)
+        else:
+            self.command(0x14)
+        self.command(SSD1306_MEMORYMODE)                    # 0x20
+        self.command(0x00)                                  # 0x0 act like ks0108
+        self.command(SSD1306_SEGREMAP | 0x1)
+        self.command(SSD1306_COMSCANDEC)
+        self.command(SSD1306_SETCOMPINS)                    # 0xDA
+        self.command(0x02)
+        self.command(SSD1306_SETCONTRAST)                   # 0x81
+        self.command(0x8F)
+        self.command(SSD1306_SETPRECHARGE)                  # 0xd9
+        if self._vccstate == SSD1306_EXTERNALVCC:
+            self.command(0x22)
+        else:
+            self.command(0xF1)
+        self.command(SSD1306_SETVCOMDETECT)                 # 0xDB
+        self.command(0x40)
+        self.command(SSD1306_DISPLAYALLON_RESUME)           # 0xA4
+        self.command(SSD1306_NORMALDISPLAY)                 # 0xA6
+
+    
+    
+    def _initialize64(self):
         # 128x64 pixel specific initialization.
         self.command(SSD1306_DISPLAYOFF)                    # 0xAE
         self.command(SSD1306_SETDISPLAYCLOCKDIV)            # 0xD5
