@@ -38,7 +38,7 @@ class _ServoController(ServoMotorControllerBase):
         #print("sp", channel, position, int(pulse), int(servo_pulse))
         self.pwm_device.set_pwm(channel, 0, int(pulse))
 
-class PCA9685ServoBoard(MotorControllerBoard):
+class PCA9685ServoDeviceDriver(MotorControllerBoard):
     def __init__(self, address=0x60, bus=None, board_id="PCA9685", board_name="PCA9685"):
         self.pwm = PCA9685DeviceDriver(address, bus)
         self.pwm.set_pwm_freq(60)

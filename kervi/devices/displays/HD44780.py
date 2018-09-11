@@ -158,7 +158,6 @@ class HD44780DeviceDriver(object):
     @property
     def display_type(self):
         return "char"
-    
 
     def home(self):
         """Move the cursor back to its home (first line and first column)."""

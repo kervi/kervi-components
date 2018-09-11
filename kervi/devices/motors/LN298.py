@@ -39,7 +39,7 @@ class _DCMotorController(DCMotorControllerBase):
             in2.set(True)
 
 
-class LN298MotorControllerBoard(MotorControllerBoard):
+class LN298DeviceDriver(MotorControllerBoard):
     def __init__(self, ena, in1, in2, enb, in3, in4, board_id="LN298", board_name="LN298"):
         MotorControllerBoard.__init__(
             self,
