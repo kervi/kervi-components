@@ -10,7 +10,7 @@ class DummySensorDeviceDriver(SensorDeviceDriver):
         self._min = kwargs.get("min", 0)
         self._max = kwargs.get("max", 100)
         self._interval = kwargs.get("interval", 1)
-        self._unit = kwargs.get("unit", "C")
+        self._unit = kwargs.get("unit", "c")
         self._type = kwargs.get("type", "temperature")
 
     def read_value(self):

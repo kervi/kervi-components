@@ -215,7 +215,7 @@ class BMP085DeviceDriver(I2CSensorDeviceDriver):
     @property
     def unit(self):
         if self._sensor_type == BMP085_TEMPERATURE_SENSOR:
-            return "C"
+            return "c"
         elif self._sensor_type == BMP085_PRESSURE_SENSOR:
             return "hPa"
         elif self._sensor_type == BMP085_ALTITUDE_SENSOR:

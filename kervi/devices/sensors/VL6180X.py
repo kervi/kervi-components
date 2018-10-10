@@ -57,7 +57,7 @@ class _VL6180X(I2CSensorDeviceDriver):
         if self._type == "distance":
             return "mm"
         else:
-            return "lux"
+            return "lx"
 
     @property
     def max(self):
