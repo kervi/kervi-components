@@ -29,4 +29,4 @@ class CPUTempSensorDeviceDriver(SensorDeviceDriver):
 
     @property
     def unit(self):
-        return "C"
+        return "c"

@@ -18,7 +18,7 @@ class TSL2561DeviceDriver(I2CSensorDeviceDriver):
 
     @property
     def unit(self):
-        return "LUX"
+        return "lx"
 
     @property
     def max(self):

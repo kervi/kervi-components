@@ -2,11 +2,11 @@ from kervi import hal
 from kervi.devices.gpio.MCP230XX import MCP23017DeviceDriver
 from kervi.devices.displays.HD44780 import HD44780RGBDeviceDriver
 
-class CharLCDDeviceDriver(HD44780RGBDeviceDriver):
+class HD44780RGB_MCP23017_DeviceDriver(HD44780RGBDeviceDriver):
     """Class to represent and interact with an Adafruit Raspberry Pi character
     LCD plate."""
 
-    def __init__(self, address=0x20, busnum=hal.default_i2c_bus(), cols=16, lines=2):
+    def __init__(self, cols=16, lines=2, address=0x20, busnum=hal.default_i2c_bus(),):
         """Initialize the character LCD plate.  Can optionally specify a separate
         I2C address or bus number, but the defaults should suffice for most needs.
         Can also optionally specify the number of columns and lines on the LCD

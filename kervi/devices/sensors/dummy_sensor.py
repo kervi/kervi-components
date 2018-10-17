@@ -1,4 +1,5 @@
-from kervi.hal import SensorDeviceDriver
+from random import randint
+from kervi.hal import SensorDeviceDriver, I2CSensorDeviceDriver
 
 class DummySensorDeviceDriver(SensorDeviceDriver):
     def __init__(self, **kwargs):
@@ -9,7 +10,7 @@ class DummySensorDeviceDriver(SensorDeviceDriver):
         self._min = kwargs.get("min", 0)
         self._max = kwargs.get("max", 100)
         self._interval = kwargs.get("interval", 1)
-        self._unit = kwargs.get("unit", "C")
+        self._unit = kwargs.get("unit", "c")
         self._type = kwargs.get("type", "temperature")
 
     def read_value(self):
@@ -41,6 +42,7 @@ class DummySensorDeviceDriver(SensorDeviceDriver):
 
 class DummyMultiDimSensorDeviceDriver(SensorDeviceDriver):
     def __init__(self):
+        SensorDeviceDriver.__init__(self)
         self.value = 0
         self.delta = 4
 
@@ -67,3 +69,48 @@ class DummyMultiDimSensorDeviceDriver(SensorDeviceDriver):
     @property
     def unit(self):
         return "degree"
+
+    @property
+    def max(self):
+        return 100
+
+    @property
+    def min(self):
+        return 0
+
+
+class DummyColorSensorDeviceDriver(I2CSensorDeviceDriver):
+    def __init__(self, **kwargs):
+        I2CSensorDeviceDriver.__init__(self, 0x20, 0)
+
+        self.value = 0
+        self.delta = kwargs.get("delta", 4)
+        self._min = kwargs.get("min", 0)
+        self._max = kwargs.get("max", 100)
+        self._interval = kwargs.get("interval", 1)
+        self._unit = kwargs.get("unit", "rgb")
+        self._type = kwargs.get("type", "color")
+
+    def read_value(self):
+        value = [randint(0,255), randint(0,255), randint(0,255)]
+        return value
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @property
+    def max(self):
+        return self._max
+
+    @property
+    def min(self):
+        return self._min
+
+    @property
+    def value_type(self):
+        return "color"

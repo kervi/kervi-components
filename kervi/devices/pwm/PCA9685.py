@@ -93,7 +93,7 @@ class PCA9685DeviceDriver(I2CGPIODeviceDriver):
         elif value == 1 or value == True:
             self.set_pwm(pin, 4096, 0)
         else:
-            raise NameError("PCA9685 Value error")
+            self.pwm_start(pin,value * 100)
 
     def define_as_pwm(self, channel, frequency, duty_cycle=None):
         """
